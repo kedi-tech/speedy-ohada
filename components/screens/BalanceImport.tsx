@@ -40,11 +40,12 @@ const toNum = (v: unknown) => {
 const EXCEL_EXTENSIONS = ['xlsx', 'xls', 'xlsm'];
 
 interface ParsedFile {
-  fileName: string;
-  rows:     unknown[][];
-  headers:  string[];
-  rawLines: RawImportLine[];
-  colMap:   Record<string, string>; // col header → field name
+  fileName:  string;
+  sheetName?: string;
+  rows:      unknown[][];
+  headers:   string[];
+  rawLines:  RawImportLine[];
+  colMap:    Record<string, string>;
 }
 
 // Known field labels
@@ -181,6 +182,15 @@ function buildRawLines(rows: unknown[][], headers: string[], colMap: Record<stri
   })).filter((l) => /^[0-9]/.test(l.account_number));
 }
 
+function detectSheets(sheetNames: string[]): { nSheet: string; n1Sheet: string | null } {
+  const norm = (s: string) => normalizeHeader(s);
+  const isN1 = (n: string) => n === 'n-1' || n === 'n 1' || n.endsWith(' n-1') || n.endsWith(' n 1') || n.includes('n-1');
+  const isN  = (n: string) => n === 'n' || n === 'balance n' || n === 'bilan n' || n.endsWith(' n');
+  const n1Sheet = sheetNames.find((s) => isN1(norm(s))) ?? (sheetNames.length >= 2 ? sheetNames[1] : null);
+  const nSheet  = sheetNames.find((s) => isN(norm(s)))  ?? sheetNames.find((s) => s !== n1Sheet) ?? sheetNames[0];
+  return { nSheet, n1Sheet: n1Sheet !== nSheet ? n1Sheet : null };
+}
+
 export function BalanceImport() {
   const { t, lang } = useT();
   const router = useRouter();
@@ -189,6 +199,7 @@ export function BalanceImport() {
   const [isDragging, setIsDragging] = useState(false);
   const [balanceType, setBalanceType] = useState<'N' | 'N-1'>('N');
   const [parsed, setParsed] = useState<ParsedFile | null>(null);
+  const [parsedN1, setParsedN1] = useState<ParsedFile | null>(null);
   const [colMap, setColMap] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
   const [isImporting, setIsImporting] = useState(false);
@@ -212,11 +223,30 @@ export function BalanceImport() {
       if (EXCEL_EXTENSIONS.includes(ext)) {
         const XLSX = await import('xlsx');
         const workbook = XLSX.read(e.target?.result, { type: 'array' });
-        const preferredSheet = workbook.SheetNames.find((name) => normalizeHeader(name) === normalizeHeader(balanceType));
-        const firstSheet = preferredSheet ?? workbook.SheetNames[0];
-        const worksheet = firstSheet ? workbook.Sheets[firstSheet] : undefined;
-        rows = worksheet ? XLSX.utils.sheet_to_json<unknown[]>(worksheet, { header: 1, raw: false, defval: '' }) : [];
+        const { nSheet, n1Sheet } = detectSheets(workbook.SheetNames);
+
+        const nWorksheet = workbook.Sheets[nSheet];
+        rows = nWorksheet ? XLSX.utils.sheet_to_json<unknown[]>(nWorksheet, { header: 1, raw: false, defval: '' }) : [];
+
+        if (n1Sheet && workbook.Sheets[n1Sheet]) {
+          let n1Rows = cleanRows(XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets[n1Sheet], { header: 1, raw: false, defval: '' }));
+          if (n1Rows.length >= 2) {
+            const n1HeaderIdx = findHeaderRowIndex(n1Rows);
+            n1Rows = n1Rows.slice(n1HeaderIdx);
+            const n1Headers = makeUniqueHeaders((n1Rows[0] ?? []).map((h) => String(h ?? '').trim()));
+            const n1ColMap: Record<string, string> = {};
+            n1Headers.forEach((h, i) => { n1ColMap[h] = detectField(h, i, n1Headers.length); });
+            const n1RawLines = buildRawLines(n1Rows, n1Headers, n1ColMap);
+            setParsedN1({ fileName: file.name, sheetName: n1Sheet, rows: n1Rows, headers: n1Headers, rawLines: n1RawLines, colMap: n1ColMap });
+          } else {
+            setParsedN1(null);
+          }
+        } else {
+          setParsedN1(null);
+        }
+        setBalanceType('N');
       } else {
+        setParsedN1(null);
         const text = e.target?.result as string;
         const sep = text.includes(';') ? ';' : ',';
         rows = parseCSV(text, sep);
