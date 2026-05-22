@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
 import { Icons } from '@/components/ui/Icon';
 import { WORKFLOW } from '@/lib/data';
+import { useWorkspace } from '@/context/WorkspaceContext';
 
 const STEP_ROUTES: Record<string, string> = {
   st_balN: '/import', st_balN1: '/import', st_balVal: '/validation',
@@ -20,6 +21,7 @@ const STEP_ROUTES: Record<string, string> = {
 
 export function Workspace() {
   const { t, lang } = useT();
+  const { activeFiscalYear } = useWorkspace();
   const [activeStep, setActiveStep] = useState('st_map');
 
   const completed = WORKFLOW.filter(
@@ -54,8 +56,8 @@ export function Workspace() {
   return (
     <div>
       <PageHeader
-        eyebrow={lang === 'fr' ? 'Espace de travail · Sahel Industries SARL' : 'Workspace · Sahel Industries SARL'}
-        title={lang === 'fr' ? 'Exercice 2025 — Clôture au 31/12/2025' : 'Fiscal Year 2025 — Closing 31/12/2025'}
+        eyebrow={activeFiscalYear ? `${lang === 'fr' ? 'Espace de travail' : 'Workspace'} · ${activeFiscalYear.company_name}` : undefined}
+        title={activeFiscalYear ? `${lang === 'fr' ? 'Exercice' : 'FY'} ${activeFiscalYear.label}` : (lang === 'fr' ? 'Espace de travail' : 'Workspace')}
         subtitle={
           lang === 'fr'
             ? "Suivez chaque étape du dossier, de l'import de la balance jusqu'à l'export du package final."

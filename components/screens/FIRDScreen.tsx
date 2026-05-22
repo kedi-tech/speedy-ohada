@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useT } from '@/context/LangContext';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
@@ -478,11 +478,8 @@ function SubsidiariesTable({
 
 export function FIRDScreen() {
   const { lang } = useT();
-  const { fiscalYears, companies } = useAppData();
+  const { activeFiscalYear, activeCompany } = useWorkspace();
   const fr = lang === 'fr';
-
-  const activeFiscalYear = fiscalYears[0];
-  const activeCompany = companies.find((c) => c.id === activeFiscalYear?.company_id);
 
   const [fird, setFird] = useState<FIRDData | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useT } from '@/context/LangContext';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
@@ -84,8 +84,7 @@ function fmtAmount(n: number) {
 
 export function AccountMapping() {
   const { t, lang } = useT();
-  const { fiscalYears } = useAppData();
-  const activeFiscalYear = fiscalYears[0];
+  const { activeFiscalYear } = useWorkspace();
   const [filter, setFilter] = useState<Filter>('all');
   const [q, setQ] = useState('');
   const [payload, setPayload] = useState<MappingPayload>({ rules: [], rows: [] });

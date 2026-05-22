@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useT } from '@/context/LangContext';
 import { useEngine } from '@/context/EngineContext';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
@@ -144,7 +144,7 @@ function formatAmount(value: number | null | undefined, _lang?: string) {
 export function ValidationCenter() {
   const { t, lang } = useT();
   const { state, calculate, loadLatestCalculation } = useEngine();
-  const { fiscalYears } = useAppData();
+  const { activeFiscalYear } = useWorkspace();
   const router = useRouter();
   const [activeCat, setActiveCat] = useState<Cat>('all');
   const [running, setRunning] = useState(false);
@@ -152,7 +152,6 @@ export function ValidationCenter() {
   const [fixMessage, setFixMessage] = useState('');
   const [traceability, setTraceability] = useState<TraceabilitySummary[]>([]);
   const [selectedTraceKey, setSelectedTraceKey] = useState('');
-  const activeFiscalYear = fiscalYears[0];
 
   const result = state.result;
 

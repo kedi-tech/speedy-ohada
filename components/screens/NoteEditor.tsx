@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useT } from '@/context/LangContext';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
@@ -13,10 +13,9 @@ import type { NoteField } from '@/lib/engine/NotesAnnexesEngine';
 
 export function NoteEditor({ id }: { id: string }) {
   const { lang } = useT();
-  const { fiscalYears } = useAppData();
+  const { activeFiscalYear } = useWorkspace();
   const router = useRouter();
   const fr = lang === 'fr';
-  const activeFiscalYear = fiscalYears[0];
   const noteNumber = Number(id);
   const [notes, setNotes] = useState<NoteAnnexe[]>([]);
   const [values, setValues] = useState<Record<string, unknown>>({});

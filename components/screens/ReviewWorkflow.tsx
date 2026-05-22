@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useT } from '@/context/LangContext';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
@@ -92,7 +92,7 @@ interface RunComparison {
 
 export function ReviewWorkflow() {
   const { lang } = useT();
-  const { fiscalYears } = useAppData();
+  const { activeFiscalYear } = useWorkspace();
   const router = useRouter();
   const fr = lang === 'fr';
   const sections = REVIEW_SECTIONS.length ? REVIEW_SECTIONS : DEFAULT_REVIEW_SECTIONS;
@@ -109,7 +109,6 @@ export function ReviewWorkflow() {
   const [selectedTraceKey, setSelectedTraceKey] = useState('');
   const [reviewBusy, setReviewBusy] = useState(false);
   const [reviewMessage, setReviewMessage] = useState('');
-  const activeFiscalYear = fiscalYears[0];
 
   const loadReviewState = async () => {
     if (!activeFiscalYear?.id) return;

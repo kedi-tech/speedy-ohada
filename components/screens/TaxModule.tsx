@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useT } from '@/context/LangContext';
 import { useEngine } from '@/context/EngineContext';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
@@ -55,14 +55,13 @@ function fmtN(v: number | null | undefined, currency: string): string {
 export function TaxModule() {
   const { lang } = useT();
   const { state, loadLatestCalculation } = useEngine();
-  const { fiscalYears } = useAppData();
+  const { activeFiscalYear } = useWorkspace();
   const fr = lang === 'fr';
   const [activeTab, setActiveTab] = useState<ActiveTab>('forms');
   const [taxRate, setTaxRate] = useState('25');
   const [vatRate, setVatRate] = useState('18');
   const [patenteRate, setPatenteRate] = useState('0.5');
   const [savingConfig, setSavingConfig] = useState(false);
-  const activeFiscalYear = fiscalYears[0];
 
   useEffect(() => {
     if (!state.result && !state.isLoadingSavedResult && activeFiscalYear?.id) {

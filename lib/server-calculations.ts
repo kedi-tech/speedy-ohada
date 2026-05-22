@@ -113,6 +113,7 @@ export async function runAndPersistCalculation(
       rccm: fiscalYear.company.rccm ?? undefined,
       city: fiscalYear.company.city,
       country: fiscalYear.company.country ?? undefined,
+      currency: fiscalYear.currency,
     },
   });
 

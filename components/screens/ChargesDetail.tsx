@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useT } from '@/context/LangContext';
 import { useEngine } from '@/context/EngineContext';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
@@ -116,12 +116,11 @@ type ViewMode = 'dgi' | 'simple';
 export function ChargesDetail() {
   const { lang } = useT();
   const { state, loadLatestCalculation } = useEngine();
-  const { fiscalYears } = useAppData();
+  const { activeFiscalYear } = useWorkspace();
   const router = useRouter();
   const fr = lang === 'fr';
   const [viewMode, setViewMode] = useState<ViewMode>('dgi');
   const [search, setSearch] = useState('');
-  const activeFiscalYear = fiscalYears[0];
 
   useEffect(() => {
     if (!state.result && !state.isLoadingSavedResult && activeFiscalYear?.id) {

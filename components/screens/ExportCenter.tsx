@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useT } from '@/context/LangContext';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
@@ -52,9 +52,8 @@ const FORMATS = [
 
 export function ExportCenter() {
   const { t, lang } = useT();
-  const { fiscalYears } = useAppData();
+  const { activeFiscalYear } = useWorkspace();
   const fr = lang === 'fr';
-  const activeFiscalYear = fiscalYears[0];
   const [payload, setPayload] = useState<ExportPayload | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [format, setFormat] = useState('pdf');

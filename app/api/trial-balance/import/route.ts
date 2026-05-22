@@ -44,7 +44,40 @@ export async function POST(request: Request) {
   const summary = summarizeBalance(normalized);
   const rowWarnings = normalized.flatMap((line) => line.warnings);
 
+  const promoteExistingN = body.promoteExistingN === true && balanceType === 'N';
+
   const importBatch = await prisma.$transaction(async (tx) => {
+    if (promoteExistingN) {
+      // Check last N import batch — skip promote if same file is being re-uploaded
+      const lastNBatch = await tx.importBatch.findFirst({
+        where: { fiscalYearId: fiscalYear.id, balanceType: 'N' },
+        orderBy: { createdAt: 'desc' },
+      });
+      const sameFile = lastNBatch?.fileName === String(body.fileName ?? '');
+      if (!sameFile) {
+        const existingNLines = await tx.trialBalanceLine.findMany({
+          where: { fiscalYearId: fiscalYear.id, companyId: fiscalYear.companyId, balanceType: 'N' },
+        });
+        if (existingNLines.length > 0) {
+          await tx.trialBalanceLine.deleteMany({
+            where: { fiscalYearId: fiscalYear.id, companyId: fiscalYear.companyId, balanceType: 'N-1' },
+          });
+          await tx.trialBalanceLine.createMany({
+            data: existingNLines.map(({ id: _id, importBatchId: _bid, balanceType: _bt, debit, credit, warnings, ...rest }) => ({
+              ...rest,
+              balanceType: 'N-1' as const,
+              importBatchId: null,
+              n1Debit: debit,
+              n1Credit: credit,
+              debit: 0,
+              credit: 0,
+              warnings: warnings ?? [],
+            })),
+          });
+        }
+      }
+    }
+
     await tx.trialBalanceLine.deleteMany({
       where: { fiscalYearId: fiscalYear.id, companyId: fiscalYear.companyId, balanceType },
     });

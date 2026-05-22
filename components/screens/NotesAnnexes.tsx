@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useT } from '@/context/LangContext';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
@@ -37,10 +37,9 @@ const STATUS_META: Record<NoteStatus, { fr: string; en: string; color: string; d
 
 export function NotesAnnexes() {
   const { lang } = useT();
-  const { fiscalYears } = useAppData();
+  const { activeFiscalYear } = useWorkspace();
   const router = useRouter();
   const fr = lang === 'fr';
-  const activeFiscalYear = fiscalYears[0];
   const [activeTab, setActiveTab] = useState<ActiveTab>('notes');
   const [filter, setFilter] = useState<NoteStatus | 'all'>('all');
   const [search, setSearch] = useState('');

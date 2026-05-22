@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useT } from '@/context/LangContext';
 import { useEngine } from '@/context/EngineContext';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
@@ -392,14 +392,13 @@ function EmptyState({ lang }: { lang: string }) {
 export function StatementsScreen() {
   const { t, lang } = useT();
   const { state, loadLatestCalculation } = useEngine();
-  const { fiscalYears } = useAppData();
+  const { activeFiscalYear } = useWorkspace();
   const [tab, setTab] = useState<Tab>('bilan');
   const [showOverrideDialog, setShowOverrideDialog] = useState(false);
   const [overrideLineKey, setOverrideLineKey] = useState('');
   const [overrideValue, setOverrideValue] = useState('');
   const [overrideReason, setOverrideReason] = useState('');
   const [overrideSaving, setOverrideSaving] = useState(false);
-  const activeFiscalYear = fiscalYears[0];
 
   useEffect(() => {
     if (!state.result && !state.isLoadingSavedResult && activeFiscalYear?.id) {

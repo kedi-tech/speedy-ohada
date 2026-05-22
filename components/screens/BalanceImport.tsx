@@ -13,7 +13,7 @@ import { summarizeBalance } from '@/lib/engine/BalanceNormalizer';
 import { normalizeBalance } from '@/lib/engine/BalanceNormalizer';
 import { enrichAllWithPrefixes } from '@/lib/engine/AccountPrefixEngine';
 import { enrichAllWithClass } from '@/lib/engine/OHADAClassEngine';
-import { useAppData } from '@/lib/useAppData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import type { RawImportLine } from '@/lib/engine/types';
 import { formatAmount } from '@/lib/format';
 
@@ -26,15 +26,17 @@ function fmtAmount(n: number) {
 
 const toNum = (v: unknown) => {
   const raw = String(v ?? '').trim().replace(/\s/g, '');
-  const cleaned = raw.includes(',') && raw.includes('.')
-    ? raw.replace(/,/g, '')
-    : raw.split(',').length > 2
-      ? raw.replace(/,/g, '')
-      : /,\d{3}$/.test(raw)
-        ? raw.replace(/,/g, '')
-        : raw.replace(',', '.');
+  const isNeg = (raw.startsWith('(') && raw.endsWith(')')) || raw.startsWith('-');
+  const stripped = raw.replace(/^-/, '').replace(/^\(/, '').replace(/\)$/, '');
+  const cleaned = stripped.includes(',') && stripped.includes('.')
+    ? stripped.replace(/,/g, '')
+    : stripped.split(',').length > 2
+      ? stripped.replace(/,/g, '')
+      : /,\d{3}$/.test(stripped)
+        ? stripped.replace(/,/g, '')
+        : stripped.replace(',', '.');
   const n = Number(cleaned);
-  return isNaN(n) ? 0 : n;
+  return isNaN(n) ? 0 : (isNeg ? -Math.abs(n) : n);
 };
 
 const EXCEL_EXTENSIONS = ['xlsx', 'xls', 'xlsm'];
@@ -169,6 +171,8 @@ function buildRawLines(rows: unknown[][], headers: string[], colMap: Record<stri
     return idx !== undefined ? row[idx] : '';
   };
 
+  const IGNORED_ACCOUNTS = new Set(['521600']);
+
   return rows.slice(1).filter((r) => r.some((c) => c !== '' && c !== null && c !== undefined)).map((row, ri) => ({
     row_index:       ri + 1,
     account_number:  String(getByField(row, 'account_number') ?? '').trim(),
@@ -179,32 +183,32 @@ function buildRawLines(rows: unknown[][], headers: string[], colMap: Record<stri
     movement_credit: toNum(getByField(row, 'movement_credit')),
     closing_debit:   toNum(getByField(row, 'closing_debit')),
     closing_credit:  toNum(getByField(row, 'closing_credit')),
-  })).filter((l) => /^[0-9]/.test(l.account_number));
+  })).filter((l) => /^[0-9]/.test(l.account_number) && !IGNORED_ACCOUNTS.has(l.account_number));
 }
 
-function detectSheets(sheetNames: string[]): { nSheet: string; n1Sheet: string | null } {
+function detectSheets(sheetNames: string[]): { nSheet: string | null; n1Sheet: string | null } {
   const norm = (s: string) => normalizeHeader(s);
-  const isN1 = (n: string) => n === 'n-1' || n === 'n 1' || n.endsWith(' n-1') || n.endsWith(' n 1') || n.includes('n-1');
-  const isN  = (n: string) => n === 'n' || n === 'balance n' || n === 'bilan n' || n.endsWith(' n');
-  const n1Sheet = sheetNames.find((s) => isN1(norm(s))) ?? (sheetNames.length >= 2 ? sheetNames[1] : null);
-  const nSheet  = sheetNames.find((s) => isN(norm(s)))  ?? sheetNames.find((s) => s !== n1Sheet) ?? sheetNames[0];
-  return { nSheet, n1Sheet: n1Sheet !== nSheet ? n1Sheet : null };
+  const isN  = (n: string) => n === 'n';
+  const isN1 = (n: string) => n === 'n-1';
+  const nSheet  = sheetNames.find((s) => isN(norm(s)))  ?? null;
+  const n1Sheet = sheetNames.find((s) => isN1(norm(s))) ?? null;
+  return { nSheet, n1Sheet };
 }
 
 export function BalanceImport() {
   const { t, lang } = useT();
   const router = useRouter();
-  const { fiscalYears } = useAppData();
+  const { activeFiscalYear } = useWorkspace();
   const [step, setStep] = useState<Step>('upload');
   const [isDragging, setIsDragging] = useState(false);
   const [balanceType, setBalanceType] = useState<'N' | 'N-1'>('N');
   const [parsed, setParsed] = useState<ParsedFile | null>(null);
   const [parsedN1, setParsedN1] = useState<ParsedFile | null>(null);
+  const [onlyNSheet, setOnlyNSheet] = useState(false);
   const [colMap, setColMap] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const activeFiscalYear = fiscalYears[0];
 
   const stepIndex = STEPS.indexOf(step);
 
@@ -225,6 +229,15 @@ export function BalanceImport() {
         const workbook = XLSX.read(e.target?.result, { type: 'array' });
         const { nSheet, n1Sheet } = detectSheets(workbook.SheetNames);
 
+        if (!nSheet) {
+          setError(
+            lang === 'fr'
+              ? `Aucune feuille nommée "N" trouvée. Les feuilles disponibles sont : ${workbook.SheetNames.join(', ')}. Renommez la feuille de l'exercice courant en "N" et celle de l'exercice précédent en "N-1".`
+              : `No sheet named "N" found. Available sheets: ${workbook.SheetNames.join(', ')}. Rename the current-year sheet to "N" and the prior-year sheet to "N-1".`,
+          );
+          return;
+        }
+
         const nWorksheet = workbook.Sheets[nSheet];
         rows = nWorksheet ? XLSX.utils.sheet_to_json<unknown[]>(nWorksheet, { header: 1, raw: false, defval: '' }) : [];
 
@@ -238,11 +251,14 @@ export function BalanceImport() {
             n1Headers.forEach((h, i) => { n1ColMap[h] = detectField(h, i, n1Headers.length); });
             const n1RawLines = buildRawLines(n1Rows, n1Headers, n1ColMap);
             setParsedN1({ fileName: file.name, sheetName: n1Sheet, rows: n1Rows, headers: n1Headers, rawLines: n1RawLines, colMap: n1ColMap });
+            setOnlyNSheet(false);
           } else {
             setParsedN1(null);
+            setOnlyNSheet(true);
           }
         } else {
           setParsedN1(null);
+          setOnlyNSheet(true);
         }
         setBalanceType('N');
       } else {
@@ -294,7 +310,8 @@ export function BalanceImport() {
     });
   };
 
-  const rawLines = parsed ? buildRawLines(parsed.rows, parsed.headers, colMap) : [];
+  const rawLines   = parsed   ? buildRawLines(parsed.rows,   parsed.headers,   colMap) : [];
+  const rawLinesN1 = parsedN1 ? buildRawLines(parsedN1.rows, parsedN1.headers, colMap) : [];
 
   // Compute live preview stats
   const previewAccounts = rawLines.length > 0 ? enrichAllWithClass(enrichAllWithPrefixes(
@@ -311,31 +328,55 @@ export function BalanceImport() {
     setIsImporting(true);
     setError('');
 
+    const fileName = parsed?.fileName ?? 'balance.xlsx';
+
+    // Import N (with optional promote-previous-N-to-N-1 when only N sheet was found)
     const importRes = await fetch('/api/trial-balance/import', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        fiscalYearId: activeFiscalYear.id,
-        balanceType,
+        fiscalYearId:    activeFiscalYear.id,
+        balanceType:     'N',
         rawLines,
-        fileName: parsed?.fileName ?? 'balance.csv',
-        columnMap: colMap,
+        fileName,
+        columnMap:       colMap,
+        sheetName:       parsed?.sheetName,
+        promoteExistingN: onlyNSheet,
       }),
     });
 
     if (!importRes.ok) {
       setIsImporting(false);
-      setError(lang === 'fr' ? "L'import a echoue. Verifiez le fichier et l'exercice." : 'Import failed. Check the file and fiscal year.');
+      setError(lang === 'fr' ? "L'import a échoué. Vérifiez le fichier et l'exercice." : 'Import failed. Check the file and fiscal year.');
       return;
     }
 
-    if (balanceType === 'N') {
-      await fetch('/api/calculations/run', {
+    // Import N-1 when both sheets were found
+    if (parsedN1 && rawLinesN1.length > 0) {
+      const importResN1 = await fetch('/api/trial-balance/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fiscalYearId: activeFiscalYear.id }),
+        body: JSON.stringify({
+          fiscalYearId: activeFiscalYear.id,
+          balanceType:  'N-1',
+          rawLines:     rawLinesN1,
+          fileName,
+          columnMap:    colMap,
+          sheetName:    parsedN1.sheetName,
+        }),
       });
+      if (!importResN1.ok) {
+        setIsImporting(false);
+        setError(lang === 'fr' ? "L'import N-1 a échoué." : 'N-1 import failed.');
+        return;
+      }
     }
+
+    await fetch('/api/calculations/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fiscalYearId: activeFiscalYear.id }),
+    });
 
     setIsImporting(false);
     router.push('/validation');
@@ -345,7 +386,7 @@ export function BalanceImport() {
   return (
     <div>
       <PageHeader
-        eyebrow={lang === 'fr' ? 'Sahel Industries SARL · Exercice 2025' : 'Sahel Industries SARL · FY 2025'}
+        eyebrow={activeFiscalYear ? `${activeFiscalYear.company_name ?? ''} · ${lang === 'fr' ? 'Exercice' : 'FY'} ${activeFiscalYear.label}` : undefined}
         title={t('nav_import')}
         subtitle={
           lang === 'fr'
@@ -411,21 +452,18 @@ export function BalanceImport() {
         {step === 'upload' && (
           <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 320px', alignItems: 'start' }}>
             <Card className="p-5 flex flex-col gap-4">
-              {/* Balance type toggle */}
-              <div className="flex items-center gap-3">
-                <span className="text-[12.5px] font-semibold text-ink-2">{lang === 'fr' ? 'Type de balance :' : 'Balance type:'}</span>
-                <div className="flex gap-1">
-                  {(['N', 'N-1'] as const).map((bt) => (
-                    <button
-                      key={bt}
-                      onClick={() => setBalanceType(bt)}
-                      className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors border ${
-                        balanceType === bt ? 'bg-rust text-white border-rust' : 'bg-bg text-muted border-line hover:border-rust/50'
-                      }`}
-                    >
-                      {lang === 'fr' ? `Balance ${bt}` : `Balance ${bt}`}
-                    </button>
-                  ))}
+              {/* Sheet naming instructions */}
+              <div className="flex items-start gap-2.5 px-3.5 py-3 rounded-xl bg-bg-2 border border-line">
+                <span className="text-muted-2 mt-0.5 flex-shrink-0"><Icons.info /></span>
+                <div>
+                  <div className="text-[12.5px] font-semibold text-ink mb-0.5">
+                    {lang === 'fr' ? 'Nommage des feuilles Excel requis' : 'Required Excel sheet names'}
+                  </div>
+                  <div className="text-[12px] text-ink-2 leading-relaxed">
+                    {lang === 'fr'
+                      ? 'Le fichier doit contenir une feuille nommée exactement "N" (exercice courant) et optionnellement "N-1" (exercice précédent). Si seule la feuille "N" est présente, la balance N précédente sera automatiquement promue en N-1.'
+                      : 'The file must contain a sheet named exactly "N" (current year) and optionally "N-1" (prior year). If only the "N" sheet is present, the previous N balance will automatically be promoted to N-1.'}
+                  </div>
                 </div>
               </div>
 
@@ -498,6 +536,34 @@ export function BalanceImport() {
         {/* Step: Columns */}
         {step === 'columns' && parsed && (
           <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 300px', alignItems: 'start' }}>
+            {/* Sheet detection status */}
+            <div className="col-span-2 flex items-center gap-4 px-4 py-3 rounded-xl border border-line bg-bg-2 text-[12.5px]">
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-green grid place-items-center text-white" style={{ fontSize: 9 }}>✓</span>
+                <span className="text-ink-2">
+                  {lang === 'fr' ? 'Feuille N :' : 'Sheet N:'}{' '}
+                  <span className="font-mono font-semibold text-ink">{parsed.sheetName ?? 'N'}</span>
+                </span>
+              </div>
+              {parsedN1 ? (
+                <div className="flex items-center gap-2 border-l border-line pl-4">
+                  <span className="w-4 h-4 rounded-full bg-green grid place-items-center text-white" style={{ fontSize: 9 }}>✓</span>
+                  <span className="text-ink-2">
+                    {lang === 'fr' ? 'Feuille N-1 :' : 'Sheet N-1:'}{' '}
+                    <span className="font-mono font-semibold text-ink">{parsedN1.sheetName ?? 'N-1'}</span>
+                  </span>
+                </div>
+              ) : onlyNSheet ? (
+                <div className="flex items-center gap-2 border-l border-line pl-4">
+                  <span className="text-[13px] text-amber-500 font-bold leading-none">!</span>
+                  <span className="text-ink-2">
+                    {lang === 'fr'
+                      ? 'Aucune feuille N-1 — la balance N existante sera automatiquement promue en N-1'
+                      : 'No N-1 sheet — the existing N balance will automatically be promoted to N-1'}
+                  </span>
+                </div>
+              ) : null}
+            </div>
             <Card>
               <CardHeader
                 title={lang === 'fr' ? 'Affectation des colonnes' : 'Column mapping'}
@@ -598,8 +664,8 @@ export function BalanceImport() {
             <div className="grid gap-4 p-5 bg-paper border border-line rounded-xl" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' }}>
               {[
                 { label: lang === 'fr' ? 'Lignes' : 'Rows', value: String(previewAccounts.length), sub: lang === 'fr' ? 'comptes importés' : 'accounts imported' },
-                { label: lang === 'fr' ? 'Total débit' : 'Total debit', value: fmtAmount(summary.total_debit), sub: 'XOF' },
-                { label: lang === 'fr' ? 'Total crédit' : 'Total credit', value: fmtAmount(summary.total_credit), sub: 'XOF' },
+                { label: lang === 'fr' ? 'Total débit' : 'Total debit', value: fmtAmount(summary.total_debit), sub: activeFiscalYear?.currency ?? '' },
+                { label: lang === 'fr' ? 'Total crédit' : 'Total credit', value: fmtAmount(summary.total_credit), sub: activeFiscalYear?.currency ?? '' },
                 { label: lang === 'fr' ? 'Équilibre' : 'Balance check', value: summary.is_balanced ? '✓' : '✗', sub: summary.is_balanced ? (lang === 'fr' ? 'Équilibré' : 'Balanced') : (lang === 'fr' ? 'Déséquilibré' : 'Unbalanced') },
                 { label: lang === 'fr' ? 'Fichier' : 'File', value: parsed?.fileName.split('.').pop()?.toUpperCase() ?? '?', sub: parsed?.fileName ?? '' },
               ].map((s, i) => (
@@ -616,8 +682,8 @@ export function BalanceImport() {
             {!summary.is_balanced && (
               <div className="px-4 py-3 rounded-xl bg-red-soft border border-red/20 text-[13px] text-red">
                 {lang === 'fr'
-                  ? `La balance n'est pas équilibrée. Écart : ${fmtAmount(Math.abs(summary.difference))} XOF. Vérifiez votre fichier avant de continuer.`
-                  : `Balance is not balanced. Difference: ${fmtAmount(Math.abs(summary.difference))} XOF. Check your file before continuing.`}
+                  ? `La balance n'est pas équilibrée. Écart : ${fmtAmount(Math.abs(summary.difference))} ${activeFiscalYear?.currency ?? ''}. Vérifiez votre fichier avant de continuer.`
+                  : `Balance is not balanced. Difference: ${fmtAmount(Math.abs(summary.difference))} ${activeFiscalYear?.currency ?? ''}. Check your file before continuing.`}
               </div>
             )}
 
