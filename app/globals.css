@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Brand colors */
+  --color-rust: #C2410C;
+  --color-rust-2: #9A3412;
+  --color-rust-soft: #FED7AA;
+  --color-rust-tint: #FFF7ED;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Surface colors */
+  --color-bg: #F8F5F0;
+  --color-bg-2: #EDE8E0;
+  --color-paper: #FFFFFF;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Border colors */
+  --color-line: #E5DDD3;
+  --color-line-2: #F0EAE3;
+
+  /* Text colors */
+  --color-ink: #1C1208;
+  --color-ink-2: #3D2E1E;
+  --color-muted: #8C7355;
+  --color-muted-2: #C4B5A0;
+
+  /* Semantic colors */
+  --color-green: #16A34A;
+  --color-green-soft: #DCFCE7;
+  --color-amber: #D97706;
+  --color-amber-soft: #FEF3C7;
+  --color-red: #DC2626;
+  --color-red-soft: #FEE2E2;
+  --color-blue: #2563EB;
+  --color-blue-soft: #DBEAFE;
+  --color-purple: #7C3AED;
+  --color-purple-soft: #EDE9FE;
+
+  /* Typography */
+  --font-serif: var(--font-source-serif), Georgia, serif;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "Courier New", monospace;
+
+  /* Border radius */
+  --radius: 8px;
+  --radius-lg: 12px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-2);
+}
+
+/* Tabular numbers for financial data */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Input and textarea reset */
+input, textarea, select {
+  font-family: inherit;
 }

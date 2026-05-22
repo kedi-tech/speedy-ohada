@@ -1,0 +1,24 @@
+{
+  "name": "available-n-n1",
+  "description": "Balanced N and N-1 import pair for comparative statements.",
+  "rawLinesN": [
+    { "row_index": 1, "account_number": "211000", "account_label": "Frais de developpement", "closing_debit": 200000, "closing_credit": 0 },
+    { "row_index": 2, "account_number": "245000", "account_label": "Materiel de transport", "closing_debit": 950000, "closing_credit": 0 },
+    { "row_index": 3, "account_number": "521000", "account_label": "Banque", "closing_debit": 350000, "closing_credit": 0 },
+    { "row_index": 4, "account_number": "401000", "account_label": "Fournisseurs", "closing_debit": 0, "closing_credit": 500000 },
+    { "row_index": 5, "account_number": "101000", "account_label": "Capital social", "closing_debit": 0, "closing_credit": 1000000 }
+  ],
+  "rawLinesN1": [
+    { "row_index": 1, "account_number": "211000", "account_label": "Frais de developpement", "closing_debit": 125000, "closing_credit": 0 },
+    { "row_index": 2, "account_number": "245000", "account_label": "Materiel de transport", "closing_debit": 725000, "closing_credit": 0 },
+    { "row_index": 3, "account_number": "521000", "account_label": "Banque", "closing_debit": 150000, "closing_credit": 0 },
+    { "row_index": 4, "account_number": "401000", "account_label": "Fournisseurs", "closing_debit": 0, "closing_credit": 350000 },
+    { "row_index": 5, "account_number": "101000", "account_label": "Capital social", "closing_debit": 0, "closing_credit": 650000 }
+  ],
+  "expected": {
+    "n": { "totalDebit": 1500000, "totalCredit": 1500000, "difference": 0 },
+    "n1": { "totalDebit": 1000000, "totalCredit": 1000000, "difference": 0 },
+    "classTotalsN": { "1": -1000000, "2": 1150000, "4": -500000, "5": 350000 },
+    "classTotalsN1": { "1": -650000, "2": 850000, "4": -350000, "5": 150000 }
+  }
+}

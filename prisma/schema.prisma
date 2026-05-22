@@ -1,0 +1,728 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Organization {
+  id         String   @id @default(cuid())
+  name       String
+  plan       String   @default("starter")
+  status     String   @default("active")
+  adminEmail String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  users      User[]
+  companies  Company[]
+  importBatches ImportBatch[]
+  calculationRuns CalculationRun[]
+  mappingRules MappingRule[]
+  accountMappingDecisions AccountMappingDecision[]
+  groupedBalanceRows GroupedBalanceRow[]
+  manualOverrides ManualOverride[]
+  reportVersions ReportVersion[]
+  exportRecords ExportRecord[]
+
+  @@index([status])
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  hashedPassword String
+  name           String
+  role           String    @default("accountant")
+  org            String    @default("")
+  initials       String    @default("")
+  status         String    @default("active")
+  lastLogin      DateTime?
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  auditLogs      AuditLog[]
+  importBatches  ImportBatch[]
+  calculationRuns CalculationRun[]
+  accountMappingDecisions AccountMappingDecision[]
+  manualOverrides ManualOverride[] @relation("ManualOverrideCreator")
+  approvedManualOverrides ManualOverride[] @relation("ManualOverrideApprover")
+  noteValues NoteValue[] @relation("NoteValueEditor")
+  fiscalManualInputs FiscalManualInput[] @relation("FiscalManualInputEditor")
+
+  @@index([role])
+  @@index([organizationId])
+}
+
+model Company {
+  id                 String    @id @default(cuid())
+  name               String
+  legalName          String?
+  commercialName     String?
+  rccm               String?
+  nif                String?
+  legalForm          String?
+  sector             String   @default("")
+  mainActivity       String?
+  address            String?
+  city               String   @default("")
+  country            String?
+  phone              String?
+  email              String?
+  website            String?
+  taxCenter          String?
+  taxRegime          String?
+  currency           String   @default("GNF")
+  accountingStandard String   @default("SYSCOHADA")
+  managerName        String?
+  managerTitle       String?
+  accountantName     String?
+  accountantContact  String?
+  auditorName        String?
+  auditorContact     String?
+  notes              String?
+  status             String   @default("draft")
+  progress           Int      @default(0)
+  organizationId     String?
+  organization       Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  fiscalYears        FiscalYear[]
+  trialBalanceLines  TrialBalanceLine[]
+  importBatches      ImportBatch[]
+  calculationRuns    CalculationRun[]
+  mappingRules        MappingRule[]
+  accountMappingDecisions AccountMappingDecision[]
+  groupedBalanceRows  GroupedBalanceRow[]
+  manualOverrides     ManualOverride[]
+  noteValues          NoteValue[]
+  fiscalConfigs       FiscalConfig[]
+  fiscalManualInputs  FiscalManualInput[]
+  reportVersions      ReportVersion[]
+  exportRecords       ExportRecord[]
+  firdMetadata        FIRDMetadata[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model FiscalYear {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  label       String
+  yearN       Int
+  yearN1      Int
+  openingDate DateTime
+  closingDate DateTime
+  currency    String   @default("GNF")
+  status      String   @default("draft")
+  locked      Boolean  @default(false)
+  progress    Int      @default(0)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  trialBalanceLines TrialBalanceLine[]
+  importBatches ImportBatch[]
+  calculationRuns CalculationRun[]
+  mappingRules MappingRule[]
+  accountMappingDecisions AccountMappingDecision[]
+  groupedBalanceRows GroupedBalanceRow[]
+  manualOverrides ManualOverride[]
+  noteValues NoteValue[]
+  fiscalManualInputs FiscalManualInput[]
+  reportVersions ReportVersion[]
+  exportRecords ExportRecord[]
+  firdMetadata FIRDMetadata?
+
+  @@index([companyId])
+  @@index([status])
+}
+
+model TrialBalanceLine {
+  id                   String   @id @default(cuid())
+  organizationId       String?
+  companyId            String?
+  fiscalYearId         String?
+  importBatchId        String?
+  company              Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYear           FiscalYear? @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  importBatch          ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  balanceType          String   @default("N")
+  sourceRow            Int?
+  acc                  String
+  label                String
+  openingDebit         Float    @default(0)
+  openingCredit        Float    @default(0)
+  movementDebit        Float    @default(0)
+  movementCredit       Float    @default(0)
+  debit                Float    @default(0)
+  credit               Float    @default(0)
+  n1Debit              Float    @default(0)
+  n1Credit             Float    @default(0)
+  netBalance           Float    @default(0)
+  prefix1              String?
+  prefix2              String?
+  prefix3              String?
+  prefix4              String?
+  prefix5              String?
+  prefix6              String?
+  accountClass         Int?
+  accountClassLabelFr  String?
+  accountClassLabelEn  String?
+  warnings             Json?
+  mapped               String   @default("")
+  status               String   @default("unmapped")
+  mappingDecisions     AccountMappingDecision[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([organizationId])
+  @@index([balanceType])
+  @@index([status])
+}
+
+model ImportBatch {
+  id                String   @id @default(cuid())
+  organizationId    String?
+  organization      Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId      String
+  fiscalYear        FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  userId            String?
+  user              User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  fileName          String
+  balanceType       String   @default("N")
+  rowCount          Int      @default(0)
+  totalDebit        Float    @default(0)
+  totalCredit       Float    @default(0)
+  difference        Float    @default(0)
+  isBalanced        Boolean  @default(false)
+  errors            Json?
+  warnings          Json?
+  columnMap         Json?
+  // Audit trail fields (Flow 1)
+  sheetName         String?
+  headerRow         Int?
+  rawRowCount       Int      @default(0)
+  rejectedRowCount  Int      @default(0)
+  parserWarnings    Json?
+  importProfileId   String?
+  importProfile     ImportProfile? @relation(fields: [importProfileId], references: [id], onDelete: SetNull)
+  createdAt         DateTime @default(now())
+
+  lines TrialBalanceLine[]
+
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([organizationId])
+  @@index([balanceType])
+}
+
+model CalculationRun {
+  id               String   @id
+  organizationId   String?
+  organization     Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  companyId        String
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId     String
+  fiscalYear       FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  userId           String?
+  user             User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  status           String   @default("completed")
+  triggerReason    String   @default("manual_run")
+  snapshot         Json
+  validation       Json
+  actif            Json
+  passif           Json
+  incomeStatement  Json
+  cashFlow         Json
+  notes            Json
+  expenseDetails   Json
+  fiscal           Json
+  traceability     Json
+  totalDebitN      Float    @default(0)
+  totalCreditN     Float    @default(0)
+  differenceN      Float    @default(0)
+  totalCritical    Int      @default(0)
+  totalWarnings    Int      @default(0)
+  canExport        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  reportVersions   ReportVersion[]
+  exportRecords    ExportRecord[]
+
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([organizationId])
+  @@index([createdAt])
+}
+
+model ReportVersion {
+  id                String   @id @default(cuid())
+  organizationId    String?
+  organization      Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId      String
+  fiscalYear        FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  calculationRunId  String
+  calculationRun    CalculationRun @relation(fields: [calculationRunId], references: [id], onDelete: Cascade)
+  versionNumber     Int
+  status            String   @default("draft")
+  validationSummary Json
+  changeSummary     String   @default("")
+  isLocked          Boolean  @default(false)
+  lockedById        String?
+  lockedAt          DateTime?
+  unlockReason      String?
+  generatedById     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  exportRecords     ExportRecord[]
+  reviewApprovals   ReviewApproval[]
+
+  @@unique([fiscalYearId, versionNumber])
+  @@index([organizationId])
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([calculationRunId])
+  @@index([status])
+}
+
+model ReviewApproval {
+  id              String   @id @default(cuid())
+  reportVersionId String
+  reportVersion   ReportVersion @relation(fields: [reportVersionId], references: [id], onDelete: Cascade)
+  sectionKey      String
+  status          String   @default("approved")
+  reviewerId      String?
+  reviewerName    String?
+  comment         String?
+  approvedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([reportVersionId, sectionKey])
+  @@index([reportVersionId])
+  @@index([sectionKey])
+  @@index([status])
+}
+
+model ExportRecord {
+  id               String   @id @default(cuid())
+  organizationId   String?
+  organization     Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  companyId        String
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId     String
+  fiscalYear       FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  reportVersionId  String
+  reportVersion    ReportVersion @relation(fields: [reportVersionId], references: [id], onDelete: Cascade)
+  calculationRunId String
+  calculationRun   CalculationRun @relation(fields: [calculationRunId], references: [id], onDelete: Cascade)
+  format           String
+  status           String   @default("completed")
+  fileName         String
+  mimeType         String
+  artifact         Json
+  generatedById    String?
+  // Binary retention fields (Flow 11)
+  fileChecksum     String?
+  fileSizeBytes    Int?
+  downloadCount    Int      @default(0)
+  fileData         Bytes?
+  createdAt        DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([reportVersionId])
+  @@index([calculationRunId])
+  @@index([createdAt])
+}
+
+model MappingRule {
+  id                   String   @id
+  organizationId       String?
+  organization         Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  companyId            String?
+  company              Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId         String?
+  fiscalYear           FiscalYear? @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  reportType           String
+  reportSection        String
+  reportLineCode       String
+  labelFr              String
+  labelEn              String
+  accountPrefixes      Json?
+  accountRanges        Json?
+  includedAccounts     Json?
+  excludedAccounts     Json?
+  sourceType           String   @default("trial_balance")
+  normalBalanceType    String
+  displaySign          String
+  formulaType          String?
+  formulaExpression    String?
+  displayOrder         Int
+  isRequired           Boolean  @default(false)
+  isEditable           Boolean  @default(false)
+  allowsManualOverride Boolean  @default(true)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  decisions AccountMappingDecision[]
+
+  @@index([organizationId])
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([reportType])
+  @@index([reportLineCode])
+  @@index([isActive])
+}
+
+model AccountMappingDecision {
+  id                 String   @id @default(cuid())
+  organizationId     String?
+  organization       Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  companyId          String?
+  company            Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId       String
+  fiscalYear         FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  trialBalanceLineId String?
+  trialBalanceLine   TrialBalanceLine? @relation(fields: [trialBalanceLineId], references: [id], onDelete: SetNull)
+  accountNumber      String
+  balanceType        String   @default("N")
+  mappingRuleId      String?
+  mappingRule        MappingRule? @relation(fields: [mappingRuleId], references: [id], onDelete: SetNull)
+  reportLineCode     String?
+  status             String   @default("manual")
+  reason             String?
+  source             String   @default("manual")
+  userId             String?
+  user               User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([fiscalYearId, accountNumber, balanceType])
+  @@index([organizationId])
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([mappingRuleId])
+  @@index([status])
+}
+
+model GroupedBalanceRow {
+  id              String   @id @default(cuid())
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId    String
+  fiscalYear      FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  balanceType     String   @default("N")
+  groupCode       String
+  groupLabelFr    String
+  groupLabelEn    String
+  // Hierarchy fields (Flow 4)
+  groupKind       String   @default("custom")
+  parentGroupCode String?
+  accountCount    Int      @default(0)
+  accountClass    Int?
+  prefixLevel     Int?
+  openingDebit    Float   @default(0)
+  openingCredit   Float   @default(0)
+  movementDebit   Float   @default(0)
+  movementCredit  Float   @default(0)
+  closingDebit    Float   @default(0)
+  closingCredit   Float   @default(0)
+  netBalance      Float   @default(0)
+  sourceAccounts  Json
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([fiscalYearId, balanceType, groupCode])
+  @@index([organizationId])
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([balanceType])
+  @@index([prefixLevel])
+  @@index([groupKind])
+  @@index([parentGroupCode])
+}
+
+model ManualOverride {
+  id             String   @id @default(cuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId   String
+  fiscalYear     FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  reportType     String
+  reportLineCode String
+  lineLabelFr    String?
+  lineLabelEn    String?
+  originalValue  Float?
+  newValue       Float
+  difference     Float
+  reason         String
+  status         String   @default("pending")
+  createdById    String?
+  createdBy      User?    @relation("ManualOverrideCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  approvedById   String?
+  approvedBy     User?    @relation("ManualOverrideApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt     DateTime?
+  reviewComment  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([reportType])
+  @@index([reportLineCode])
+  @@index([status])
+}
+
+model NoteValue {
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId   String
+  fiscalYear     FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  noteNumber     Int
+  // Note variant for sub-schedules like NOTE 3A, NOTE 3B, NOTE 8A/B/C (Flow 8)
+  noteVariant    String   @default("")
+  fieldKey       String
+  value          Json
+  status         String   @default("toComplete")
+  updatedById    String?
+  updatedBy      User?    @relation("NoteValueEditor", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([fiscalYearId, noteNumber, noteVariant, fieldKey])
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([noteNumber])
+  @@index([noteVariant])
+}
+
+model FiscalConfig {
+  id                String   @id @default(cuid())
+  companyId         String?
+  company           Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  countryCode       String
+  fiscalRegime      String   @default("normal")
+  fiscalYear        Int
+  taxRate           Float    @default(25)
+  minimumTax        Float?
+  vatRate           Float    @default(18)
+  patenteRate       Float    @default(0.5)
+  currencyCode      String   @default("GNF")
+  decimalPlaces     Int      @default(0)
+  roundingTolerance Float    @default(1)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([companyId, countryCode, fiscalRegime, fiscalYear])
+  @@index([companyId])
+  @@index([countryCode, fiscalRegime, fiscalYear])
+}
+
+model FiscalManualInput {
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId   String
+  fiscalYear     FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  inputType      String
+  lineCode       String
+  labelFr        String
+  labelEn        String
+  value          Float    @default(0)
+  source         String?
+  comment        String?
+  updatedById    String?
+  updatedBy      User?    @relation("FiscalManualInputEditor", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([fiscalYearId, inputType, lineCode])
+  @@index([companyId])
+  @@index([fiscalYearId])
+  @@index([inputType])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userName   String
+  userRole   String
+  action     String
+  entityType String
+  entityName String
+  oldValue   String?
+  newValue   String?
+  reason     String?
+  ip         String?
+  device     String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  type       String   @default("info")
+  titleFr    String
+  titleEn    String
+  bodyFr     String
+  bodyEn     String
+  read       Boolean  @default(false)
+  actionHref String?
+  createdAt  DateTime @default(now())
+
+  @@index([read])
+}
+
+// ─── Import Profile (Flow 1) ──────────────────────────────────────────────────
+// Reusable column mapping profiles so the same file layout doesn't need re-mapping every time.
+
+model ImportProfile {
+  id             String   @id @default(cuid())
+  organizationId String?
+  name           String
+  description    String?
+  fileName       String?
+  sheetName      String?
+  headerRow      Int      @default(0)
+  columnMap      Json
+  balanceType    String   @default("N")
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  importBatches  ImportBatch[]
+
+  @@index([organizationId])
+}
+
+// ─── Account Plan Entry (Flow 2) ──────────────────────────────────────────────
+// Stores the official SYSCOHADA 1,499-row account plan reference imported from
+// liste de comptes.xlsx.  Versioned so updates to the plan can be tracked.
+
+model AccountPlanEntry {
+  id             String   @id @default(cuid())
+  version        String   @default("SYSCOHADA_2017")
+  accountNumber  String
+  labelFr        String
+  labelEn        String?
+  accountClass   Int
+  accountType    String   @default("detail")
+  isDeprecated   Boolean  @default(false)
+  deprecatedNote String?
+  normalBalance  String   @default("debit")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([version, accountNumber])
+  @@index([accountClass])
+  @@index([accountType])
+  @@index([version])
+}
+
+// ─── FIRD Metadata (Flow 5) ───────────────────────────────────────────────────
+// Stores the statutory filing identity data required on pages 1-6 of the liasse:
+// FIRD 1 (company identification), FIRD 2 (activity codes), FIRD 3 (signatories).
+
+model FIRDMetadata {
+  id                    String    @id @default(cuid())
+  companyId             String
+  company               Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fiscalYearId          String    @unique
+  fiscalYear            FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  // FIRD 1 – Identification
+  ministryCode          String?
+  taxCenterCode         String?
+  depositCenterCode     String?
+  legalFormCode         String?
+  fiscalRegimeCode      String?
+  importerCode          String?
+  bankDomiciliation     String?
+  socialSecurityNumber  String?
+  // FIRD 2 – Activity codes
+  mainActivityCode      String?
+  secondaryActivityCode String?
+  activityPercentageMain Float?
+  activityPercentageSecondary Float?
+  economicActivityCode  String?
+  // FIRD 3 – Signatories / Personnel
+  accountantName        String?
+  accountantNumber      String?
+  auditorName           String?
+  auditorNumber         String?
+  signatoryName         String?
+  signatoryTitle        String?
+  signatureDate         DateTime?
+  // Shareholders / board
+  shareholders          Json?
+  boardMembers          Json?
+  subsidiaries          Json?
+  status                String    @default("draft")
+  completionPct         Int       @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([companyId])
+}
+
+// ─── Traceability Record (Flow 13) ────────────────────────────────────────────
+// First-class table replacing traceability JSON embedded in CalculationRun.
+// Enables per-cell drill-down, history comparison, and audit queries.
+
+model TraceabilityRecord {
+  id                String   @id @default(cuid())
+  organizationId    String?
+  companyId         String
+  fiscalYearId      String
+  calculationRunId  String
+  reportType        String
+  lineCode          String
+  labelFr           String
+  labelEn           String
+  valueN            Float?
+  valueN1           Float?
+  variationAmount   Float?
+  formulaUsed       String
+  sourceAccounts    Json
+  dependencyChain   Json?
+  mappingRuleIds    Json?
+  sourceRows        Json?
+  isManualOverride  Boolean  @default(false)
+  overrideId        String?
+  overrideReason    String?
+  calculatedAt      DateTime @default(now())
+
+  @@index([calculationRunId])
+  @@index([fiscalYearId])
+  @@index([companyId])
+  @@index([reportType])
+  @@index([lineCode])
+}

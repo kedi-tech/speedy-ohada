@@ -1,0 +1,13 @@
+{
+  "name": "sparse-import",
+  "description": "Sparse import that uses net_balance only and should still derive debit and credit sides.",
+  "rawLinesN": [
+    { "row_index": 1, "account_number": "601000", "account_label": "Achats de marchandises", "net_balance": 275000 },
+    { "row_index": 2, "account_number": "706000", "account_label": "Prestations de services", "net_balance": -275000 }
+  ],
+  "expected": {
+    "n": { "totalDebit": 275000, "totalCredit": 275000, "difference": 0 },
+    "derivedFromNetBalance": true,
+    "classTotalsN": { "6": 275000, "7": -275000 }
+  }
+}

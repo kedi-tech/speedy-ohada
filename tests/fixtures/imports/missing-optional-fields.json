@@ -1,0 +1,14 @@
+{
+  "name": "missing-optional-fields",
+  "description": "Import where optional opening and movement fields are absent but closing balances are available.",
+  "rawLinesN": [
+    { "row_index": 1, "account_number": "411000", "account_label": "Clients", "closing_debit": 320000, "closing_credit": 0 },
+    { "row_index": 2, "account_number": "521000", "account_label": "Banque", "closing_debit": 180000, "closing_credit": 0 },
+    { "row_index": 3, "account_number": "701000", "account_label": "Ventes", "closing_debit": 0, "closing_credit": 500000 }
+  ],
+  "expected": {
+    "n": { "totalDebit": 500000, "totalCredit": 500000, "difference": 0 },
+    "missingOptionalNumericDefaults": true,
+    "classTotalsN": { "4": 320000, "5": 180000, "7": -500000 }
+  }
+}

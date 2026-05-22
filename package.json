@@ -5,13 +5,25 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "test:validation": "node scripts/validation-regression.mjs",
+    "test:workbook-parity": "node scripts/workbook-parity-regression.mjs",
+    "test:balances": "node scripts/test-balances-e2e.mjs",
+    "test:regression": "npm run test:validation && npm run test:workbook-parity",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@types/pg": "^8.20.0",
     "next": "16.2.6",
+    "pg": "^8.20.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "xlsx": "^0.18.5"
+  },
+  "prisma": {
+    "seed": "node scripts/seed-login.mjs"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -20,6 +32,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
