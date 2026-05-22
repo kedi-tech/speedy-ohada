@@ -30,6 +30,15 @@ export type OrganizationMinAggregateOutputType = {
   plan: string | null
   status: string | null
   adminEmail: string | null
+  oneccaNumber: string | null
+  rccm: string | null
+  address: string | null
+  city: string | null
+  country: string | null
+  phone: string | null
+  email: string | null
+  website: string | null
+  logoUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -40,6 +49,15 @@ export type OrganizationMaxAggregateOutputType = {
   plan: string | null
   status: string | null
   adminEmail: string | null
+  oneccaNumber: string | null
+  rccm: string | null
+  address: string | null
+  city: string | null
+  country: string | null
+  phone: string | null
+  email: string | null
+  website: string | null
+  logoUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,6 +68,15 @@ export type OrganizationCountAggregateOutputType = {
   plan: number
   status: number
   adminEmail: number
+  oneccaNumber: number
+  rccm: number
+  address: number
+  city: number
+  country: number
+  phone: number
+  email: number
+  website: number
+  logoUrl: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -62,6 +89,15 @@ export type OrganizationMinAggregateInputType = {
   plan?: true
   status?: true
   adminEmail?: true
+  oneccaNumber?: true
+  rccm?: true
+  address?: true
+  city?: true
+  country?: true
+  phone?: true
+  email?: true
+  website?: true
+  logoUrl?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -72,6 +108,15 @@ export type OrganizationMaxAggregateInputType = {
   plan?: true
   status?: true
   adminEmail?: true
+  oneccaNumber?: true
+  rccm?: true
+  address?: true
+  city?: true
+  country?: true
+  phone?: true
+  email?: true
+  website?: true
+  logoUrl?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -82,6 +127,15 @@ export type OrganizationCountAggregateInputType = {
   plan?: true
   status?: true
   adminEmail?: true
+  oneccaNumber?: true
+  rccm?: true
+  address?: true
+  city?: true
+  country?: true
+  phone?: true
+  email?: true
+  website?: true
+  logoUrl?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -165,6 +219,15 @@ export type OrganizationGroupByOutputType = {
   plan: string
   status: string
   adminEmail: string
+  oneccaNumber: string | null
+  rccm: string | null
+  address: string | null
+  city: string | null
+  country: string | null
+  phone: string | null
+  email: string | null
+  website: string | null
+  logoUrl: string | null
   createdAt: Date
   updatedAt: Date
   _count: OrganizationCountAggregateOutputType | null
@@ -196,6 +259,15 @@ export type OrganizationWhereInput = {
   plan?: Prisma.StringFilter<"Organization"> | string
   status?: Prisma.StringFilter<"Organization"> | string
   adminEmail?: Prisma.StringFilter<"Organization"> | string
+  oneccaNumber?: Prisma.StringNullableFilter<"Organization"> | string | null
+  rccm?: Prisma.StringNullableFilter<"Organization"> | string | null
+  address?: Prisma.StringNullableFilter<"Organization"> | string | null
+  city?: Prisma.StringNullableFilter<"Organization"> | string | null
+  country?: Prisma.StringNullableFilter<"Organization"> | string | null
+  phone?: Prisma.StringNullableFilter<"Organization"> | string | null
+  email?: Prisma.StringNullableFilter<"Organization"> | string | null
+  website?: Prisma.StringNullableFilter<"Organization"> | string | null
+  logoUrl?: Prisma.StringNullableFilter<"Organization"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   users?: Prisma.UserListRelationFilter
@@ -216,6 +288,15 @@ export type OrganizationOrderByWithRelationInput = {
   plan?: Prisma.SortOrder
   status?: Prisma.SortOrder
   adminEmail?: Prisma.SortOrder
+  oneccaNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  rccm?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  country?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  website?: Prisma.SortOrderInput | Prisma.SortOrder
+  logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   users?: Prisma.UserOrderByRelationAggregateInput
@@ -239,6 +320,15 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   plan?: Prisma.StringFilter<"Organization"> | string
   status?: Prisma.StringFilter<"Organization"> | string
   adminEmail?: Prisma.StringFilter<"Organization"> | string
+  oneccaNumber?: Prisma.StringNullableFilter<"Organization"> | string | null
+  rccm?: Prisma.StringNullableFilter<"Organization"> | string | null
+  address?: Prisma.StringNullableFilter<"Organization"> | string | null
+  city?: Prisma.StringNullableFilter<"Organization"> | string | null
+  country?: Prisma.StringNullableFilter<"Organization"> | string | null
+  phone?: Prisma.StringNullableFilter<"Organization"> | string | null
+  email?: Prisma.StringNullableFilter<"Organization"> | string | null
+  website?: Prisma.StringNullableFilter<"Organization"> | string | null
+  logoUrl?: Prisma.StringNullableFilter<"Organization"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   users?: Prisma.UserListRelationFilter
@@ -259,6 +349,15 @@ export type OrganizationOrderByWithAggregationInput = {
   plan?: Prisma.SortOrder
   status?: Prisma.SortOrder
   adminEmail?: Prisma.SortOrder
+  oneccaNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  rccm?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  country?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  website?: Prisma.SortOrderInput | Prisma.SortOrder
+  logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.OrganizationCountOrderByAggregateInput
@@ -275,6 +374,15 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   plan?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   status?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   adminEmail?: Prisma.StringWithAggregatesFilter<"Organization"> | string
+  oneccaNumber?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  rccm?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  address?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  city?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  country?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  phone?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  email?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  website?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  logoUrl?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
 }
@@ -285,6 +393,15 @@ export type OrganizationCreateInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
@@ -305,6 +422,15 @@ export type OrganizationUncheckedCreateInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
@@ -325,6 +451,15 @@ export type OrganizationUpdateInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
@@ -345,6 +480,15 @@ export type OrganizationUncheckedUpdateInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -365,6 +509,15 @@ export type OrganizationCreateManyInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -375,6 +528,15 @@ export type OrganizationUpdateManyMutationInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -385,6 +547,15 @@ export type OrganizationUncheckedUpdateManyInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -395,6 +566,15 @@ export type OrganizationCountOrderByAggregateInput = {
   plan?: Prisma.SortOrder
   status?: Prisma.SortOrder
   adminEmail?: Prisma.SortOrder
+  oneccaNumber?: Prisma.SortOrder
+  rccm?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  country?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  website?: Prisma.SortOrder
+  logoUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -405,6 +585,15 @@ export type OrganizationMaxOrderByAggregateInput = {
   plan?: Prisma.SortOrder
   status?: Prisma.SortOrder
   adminEmail?: Prisma.SortOrder
+  oneccaNumber?: Prisma.SortOrder
+  rccm?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  country?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  website?: Prisma.SortOrder
+  logoUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -415,6 +604,15 @@ export type OrganizationMinOrderByAggregateInput = {
   plan?: Prisma.SortOrder
   status?: Prisma.SortOrder
   adminEmail?: Prisma.SortOrder
+  oneccaNumber?: Prisma.SortOrder
+  rccm?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  country?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  website?: Prisma.SortOrder
+  logoUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -426,6 +624,10 @@ export type OrganizationNullableScalarRelationFilter = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -598,6 +800,15 @@ export type OrganizationCreateWithoutUsersInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   companies?: Prisma.CompanyCreateNestedManyWithoutOrganizationInput
@@ -617,6 +828,15 @@ export type OrganizationUncheckedCreateWithoutUsersInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutOrganizationInput
@@ -652,6 +872,15 @@ export type OrganizationUpdateWithoutUsersInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   companies?: Prisma.CompanyUpdateManyWithoutOrganizationNestedInput
@@ -671,6 +900,15 @@ export type OrganizationUncheckedUpdateWithoutUsersInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   companies?: Prisma.CompanyUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -690,6 +928,15 @@ export type OrganizationCreateWithoutCompaniesInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
@@ -709,6 +956,15 @@ export type OrganizationUncheckedCreateWithoutCompaniesInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
@@ -744,6 +1000,15 @@ export type OrganizationUpdateWithoutCompaniesInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
@@ -763,6 +1028,15 @@ export type OrganizationUncheckedUpdateWithoutCompaniesInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -782,6 +1056,15 @@ export type OrganizationCreateWithoutImportBatchesInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
@@ -801,6 +1084,15 @@ export type OrganizationUncheckedCreateWithoutImportBatchesInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
@@ -836,6 +1128,15 @@ export type OrganizationUpdateWithoutImportBatchesInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
@@ -855,6 +1156,15 @@ export type OrganizationUncheckedUpdateWithoutImportBatchesInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -874,6 +1184,15 @@ export type OrganizationCreateWithoutCalculationRunsInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
@@ -893,6 +1212,15 @@ export type OrganizationUncheckedCreateWithoutCalculationRunsInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
@@ -928,6 +1256,15 @@ export type OrganizationUpdateWithoutCalculationRunsInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
@@ -947,6 +1284,15 @@ export type OrganizationUncheckedUpdateWithoutCalculationRunsInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -966,6 +1312,15 @@ export type OrganizationCreateWithoutReportVersionsInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
@@ -985,6 +1340,15 @@ export type OrganizationUncheckedCreateWithoutReportVersionsInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1020,6 +1384,15 @@ export type OrganizationUpdateWithoutReportVersionsInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
@@ -1039,6 +1412,15 @@ export type OrganizationUncheckedUpdateWithoutReportVersionsInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1058,6 +1440,15 @@ export type OrganizationCreateWithoutExportRecordsInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
@@ -1077,6 +1468,15 @@ export type OrganizationUncheckedCreateWithoutExportRecordsInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1112,6 +1512,15 @@ export type OrganizationUpdateWithoutExportRecordsInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
@@ -1131,6 +1540,15 @@ export type OrganizationUncheckedUpdateWithoutExportRecordsInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1150,6 +1568,15 @@ export type OrganizationCreateWithoutMappingRulesInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
@@ -1169,6 +1596,15 @@ export type OrganizationUncheckedCreateWithoutMappingRulesInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1204,6 +1640,15 @@ export type OrganizationUpdateWithoutMappingRulesInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
@@ -1223,6 +1668,15 @@ export type OrganizationUncheckedUpdateWithoutMappingRulesInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1242,6 +1696,15 @@ export type OrganizationCreateWithoutAccountMappingDecisionsInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
@@ -1261,6 +1724,15 @@ export type OrganizationUncheckedCreateWithoutAccountMappingDecisionsInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1296,6 +1768,15 @@ export type OrganizationUpdateWithoutAccountMappingDecisionsInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
@@ -1315,6 +1796,15 @@ export type OrganizationUncheckedUpdateWithoutAccountMappingDecisionsInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1334,6 +1824,15 @@ export type OrganizationCreateWithoutGroupedBalanceRowsInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
@@ -1353,6 +1852,15 @@ export type OrganizationUncheckedCreateWithoutGroupedBalanceRowsInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1388,6 +1896,15 @@ export type OrganizationUpdateWithoutGroupedBalanceRowsInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
@@ -1407,6 +1924,15 @@ export type OrganizationUncheckedUpdateWithoutGroupedBalanceRowsInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1426,6 +1952,15 @@ export type OrganizationCreateWithoutManualOverridesInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
@@ -1445,6 +1980,15 @@ export type OrganizationUncheckedCreateWithoutManualOverridesInput = {
   plan?: string
   status?: string
   adminEmail: string
+  oneccaNumber?: string | null
+  rccm?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  logoUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1480,6 +2024,15 @@ export type OrganizationUpdateWithoutManualOverridesInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
@@ -1499,6 +2052,15 @@ export type OrganizationUncheckedUpdateWithoutManualOverridesInput = {
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  oneccaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rccm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1630,6 +2192,15 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   plan?: boolean
   status?: boolean
   adminEmail?: boolean
+  oneccaNumber?: boolean
+  rccm?: boolean
+  address?: boolean
+  city?: boolean
+  country?: boolean
+  phone?: boolean
+  email?: boolean
+  website?: boolean
+  logoUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   users?: boolean | Prisma.Organization$usersArgs<ExtArgs>
@@ -1651,6 +2222,15 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   plan?: boolean
   status?: boolean
   adminEmail?: boolean
+  oneccaNumber?: boolean
+  rccm?: boolean
+  address?: boolean
+  city?: boolean
+  country?: boolean
+  phone?: boolean
+  email?: boolean
+  website?: boolean
+  logoUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["organization"]>
@@ -1661,6 +2241,15 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   plan?: boolean
   status?: boolean
   adminEmail?: boolean
+  oneccaNumber?: boolean
+  rccm?: boolean
+  address?: boolean
+  city?: boolean
+  country?: boolean
+  phone?: boolean
+  email?: boolean
+  website?: boolean
+  logoUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["organization"]>
@@ -1671,11 +2260,20 @@ export type OrganizationSelectScalar = {
   plan?: boolean
   status?: boolean
   adminEmail?: boolean
+  oneccaNumber?: boolean
+  rccm?: boolean
+  address?: boolean
+  city?: boolean
+  country?: boolean
+  phone?: boolean
+  email?: boolean
+  website?: boolean
+  logoUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "plan" | "status" | "adminEmail" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "plan" | "status" | "adminEmail" | "oneccaNumber" | "rccm" | "address" | "city" | "country" | "phone" | "email" | "website" | "logoUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.Organization$usersArgs<ExtArgs>
   companies?: boolean | Prisma.Organization$companiesArgs<ExtArgs>
@@ -1712,6 +2310,15 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     plan: string
     status: string
     adminEmail: string
+    oneccaNumber: string | null
+    rccm: string | null
+    address: string | null
+    city: string | null
+    country: string | null
+    phone: string | null
+    email: string | null
+    website: string | null
+    logoUrl: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["organization"]>
@@ -2152,6 +2759,15 @@ export interface OrganizationFieldRefs {
   readonly plan: Prisma.FieldRef<"Organization", 'String'>
   readonly status: Prisma.FieldRef<"Organization", 'String'>
   readonly adminEmail: Prisma.FieldRef<"Organization", 'String'>
+  readonly oneccaNumber: Prisma.FieldRef<"Organization", 'String'>
+  readonly rccm: Prisma.FieldRef<"Organization", 'String'>
+  readonly address: Prisma.FieldRef<"Organization", 'String'>
+  readonly city: Prisma.FieldRef<"Organization", 'String'>
+  readonly country: Prisma.FieldRef<"Organization", 'String'>
+  readonly phone: Prisma.FieldRef<"Organization", 'String'>
+  readonly email: Prisma.FieldRef<"Organization", 'String'>
+  readonly website: Prisma.FieldRef<"Organization", 'String'>
+  readonly logoUrl: Prisma.FieldRef<"Organization", 'String'>
   readonly createdAt: Prisma.FieldRef<"Organization", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Organization", 'DateTime'>
 }

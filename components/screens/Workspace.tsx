@@ -9,6 +9,7 @@ import { Btn } from '@/components/ui/Btn';
 import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
 import { Icons } from '@/components/ui/Icon';
+import { Modal } from '@/components/ui/Modal';
 import { WORKFLOW } from '@/lib/data';
 import { useWorkspace } from '@/context/WorkspaceContext';
 
@@ -19,10 +20,133 @@ const STEP_ROUTES: Record<string, string> = {
   st_review: '/review', st_export: '/export',
 };
 
+interface Issue {
+  id: string;
+  lvl: 'critical' | 'warning';
+  title_fr: string;
+  title_en: string;
+  desc_fr: string;
+  desc_en: string;
+  impact_fr: string;
+  impact_en: string;
+  fix_fr: string;
+  fix_en: string;
+  href?: string;
+  href_label_fr?: string;
+  href_label_en?: string;
+}
+
+const ISSUES: Issue[] = [
+  {
+    id: 'unmapped_accounts',
+    lvl: 'critical',
+    title_fr: '4 comptes non affectés',
+    title_en: '4 unmapped accounts',
+    desc_fr:
+      "Quatre comptes du plan comptable importé n'ont pas encore été affectés à une ligne du bilan ou du compte de résultat SYSCOHADA. Ces comptes ont été détectés lors de l'import de la balance mais leur nature (actif, passif, produit ou charge) n'a pas pu être déterminée automatiquement.",
+    desc_en:
+      "Four accounts from the imported trial balance have not yet been assigned to a balance sheet or income statement line under SYSCOHADA. They were detected during the import but their nature (asset, liability, income or expense) could not be determined automatically.",
+    impact_fr:
+      "Tant que ces comptes restent non affectés, les totaux du Bilan et du Compte de résultat sont incomplets. La génération du package de clôture final est bloquée.",
+    impact_en:
+      "As long as these accounts remain unmapped, the balance sheet and income statement totals are incomplete. Final package generation is blocked.",
+    fix_fr: "Ouvrez l'écran Affectation des comptes, recherchez les comptes marqués « Non affecté » et assignez chacun à la rubrique SYSCOHADA correspondante.",
+    fix_en: 'Open the Account Mapping screen, find accounts marked "Unmapped", and assign each one to the appropriate SYSCOHADA line.',
+    href: '/mapping',
+    href_label_fr: "Aller à l'affectation",
+    href_label_en: 'Go to mapping',
+  },
+  {
+    id: 'incomplete_notes',
+    lvl: 'critical',
+    title_fr: '7 notes annexes incomplètes',
+    title_en: '7 annex notes incomplete',
+    desc_fr:
+      "Sept notes annexes obligatoires du dossier de clôture SYSCOHADA sont incomplètes ou n'ont pas encore été renseignées. Les notes annexes font partie intégrante des états financiers ; leur absence constitue une non-conformité réglementaire.",
+    desc_en:
+      "Seven mandatory annex notes required by the SYSCOHADA closing package are incomplete or have not yet been filled in. Annex notes are an integral part of the financial statements; their absence constitutes a regulatory non-compliance.",
+    impact_fr:
+      "Les états financiers ne peuvent pas être validés ni exportés sans l'ensemble des notes annexes requises. Le réviseur ne pourra pas signer le dossier tant que ces notes restent vides.",
+    impact_en:
+      "Financial statements cannot be validated or exported without the complete set of required notes. The reviewer cannot sign off on the file while these notes remain empty.",
+    fix_fr:
+      "Accédez à l'écran Notes annexes, consultez la liste des notes en attente (marquées en rouge), et complétez chaque champ requis.",
+    fix_en:
+      "Go to the Annex Notes screen, review the pending notes (marked in red), and complete each required field.",
+    href: '/notes',
+    href_label_fr: 'Aller aux notes annexes',
+    href_label_en: 'Go to annex notes',
+  },
+  {
+    id: 'missing_patent',
+    lvl: 'critical',
+    title_fr: 'Patente non renseignée',
+    title_en: 'Business licence missing',
+    desc_fr:
+      "Le numéro de patente (ou numéro de contribution des patentes) de la société n'a pas été renseigné dans la fiche entreprise. Ce numéro est obligatoire dans le cadre du dépôt SYSCOHADA auprès des administrations fiscales de la zone OHADA.",
+    desc_en:
+      "The business licence number (patente) for the company has not been entered in the company profile. This number is mandatory for SYSCOHADA filing with tax authorities in the OHADA zone.",
+    impact_fr:
+      "L'absence de ce numéro entraîne le rejet du dossier par l'administration fiscale. Il apparaît sur la page de garde des états financiers et sur les formulaires de dépôt obligatoires.",
+    impact_en:
+      "Without this number, the filing will be rejected by the tax authority. It appears on the cover page of the financial statements and on mandatory submission forms.",
+    fix_fr:
+      "Ouvrez la fiche de la société (Paramètres > Société), renseignez le numéro de patente dans le champ prévu, puis enregistrez.",
+    fix_en:
+      "Open the company profile (Settings > Company), enter the business licence number in the designated field, then save.",
+    href: '/settings',
+    href_label_fr: 'Aller aux paramètres',
+    href_label_en: 'Go to settings',
+  },
+  {
+    id: 'missing_logo',
+    lvl: 'warning',
+    title_fr: 'Logo de la société manquant',
+    title_en: 'Company logo missing',
+    desc_fr:
+      "Aucun logo n'a été téléversé pour cette société. Le logo apparaît sur les pages de garde, les états financiers exportés et les rapports PDF générés par l'application.",
+    desc_en:
+      "No logo has been uploaded for this company. The logo appears on cover pages, exported financial statements, and PDF reports generated by the application.",
+    impact_fr:
+      "Sans logo, les documents exportés utiliseront un espace vide ou un placeholder générique, ce qui peut nuire à la présentation professionnelle du dossier. Cela ne bloque pas l'export.",
+    impact_en:
+      "Without a logo, exported documents will display an empty space or a generic placeholder, which may affect the professional appearance of the package. This does not block the export.",
+    fix_fr:
+      "Dans les paramètres de la société, cliquez sur « Changer le logo » et importez un fichier PNG ou SVG (recommandé : 400 × 400 px minimum, fond transparent).",
+    fix_en:
+      'In the company settings, click "Change logo" and upload a PNG or SVG file (recommended: 400 × 400 px minimum, transparent background).',
+    href: '/settings',
+    href_label_fr: 'Aller aux paramètres',
+    href_label_en: 'Go to settings',
+  },
+  {
+    id: 'cash_variation',
+    lvl: 'warning',
+    title_fr: 'Variation de trésorerie à confirmer',
+    title_en: 'Cash variation to confirm',
+    desc_fr:
+      "La variation nette de trésorerie calculée dans le tableau des flux de trésorerie (TFT) ne correspond pas exactement à la différence entre les soldes de trésorerie de clôture N et N-1. Un écart résiduel de ±1 a été détecté, probablement dû à un arrondi ou à un compte de trésorerie non affecté.",
+    desc_en:
+      "The net cash variation calculated in the statement of cash flows (SCF) does not exactly match the difference between the N and N-1 closing cash balances. A residual difference of ±1 was detected, likely due to rounding or an unassigned treasury account.",
+    impact_fr:
+      "Un écart dans le TFT constitue une anomalie comptable. Bien que non bloquant pour l'export, il sera signalé lors de la révision et devra être justifié avant signature.",
+    impact_en:
+      "A discrepancy in the SCF constitutes an accounting anomaly. Although non-blocking for export, it will be flagged during review and must be justified before sign-off.",
+    fix_fr:
+      "Vérifiez que tous les comptes de trésorerie (classe 5) sont bien affectés. Contrôlez les soldes d'ouverture N-1 et les montants de clôture N dans la balance. Si l'écart persiste, ajustez manuellement la note de réconciliation.",
+    fix_en:
+      "Verify that all treasury accounts (class 5) are properly assigned. Check N-1 opening balances and N closing amounts in the trial balance. If the gap persists, manually adjust the reconciliation note.",
+    href: '/statements',
+    href_label_fr: 'Voir les états financiers',
+    href_label_en: 'View financial statements',
+  },
+];
+
 export function Workspace() {
   const { t, lang } = useT();
   const { activeFiscalYear } = useWorkspace();
   const [activeStep, setActiveStep] = useState('st_map');
+  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
 
   const completed = WORKFLOW.filter(
     (s) => s.status === 'completed' || s.status === 'ready'
@@ -208,17 +332,26 @@ export function Workspace() {
           <Card>
             <CardHeader title={`${t('criticalErrors')} · ${t('warnings')}`} />
             <div className="py-1">
-              {[
-                { lvl: 'critical', fr: '4 comptes non affectés',         en: '4 unmapped accounts' },
-                { lvl: 'critical', fr: '7 notes annexes incomplètes',    en: '7 annex notes incomplete' },
-                { lvl: 'critical', fr: 'Patente non renseignée',         en: 'Business license missing' },
-                { lvl: 'warning',  fr: 'Logo de la société manquant',   en: 'Company logo missing' },
-                { lvl: 'warning',  fr: 'Variation de trésorerie à confirmer', en: 'Cash variation to confirm' },
-              ].map((e, i) => (
-                <div key={i} className="flex gap-2.5 px-4 py-2 items-start">
-                  <span className={`mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 ${e.lvl === 'critical' ? 'bg-red' : 'bg-amber'}`} />
-                  <div className="text-[12.5px] text-ink-2">{lang === 'fr' ? e.fr : e.en}</div>
-                </div>
+              {ISSUES.map((issue) => (
+                <button
+                  key={issue.id}
+                  type="button"
+                  onClick={() => setSelectedIssue(issue)}
+                  className="w-full text-left flex gap-2.5 px-4 py-2.5 items-start hover:bg-bg transition-colors group"
+                >
+                  <span className={`mt-[5px] w-1.5 h-1.5 rounded-full flex-shrink-0 ${issue.lvl === 'critical' ? 'bg-red' : 'bg-amber'}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[12.5px] text-ink-2 group-hover:text-ink transition-colors leading-snug">
+                      {lang === 'fr' ? issue.title_fr : issue.title_en}
+                    </div>
+                    <div className="text-[11px] text-muted mt-0.5">
+                      {issue.lvl === 'critical'
+                        ? (lang === 'fr' ? 'Erreur critique · Cliquer pour détails' : 'Critical error · Click for details')
+                        : (lang === 'fr' ? 'Avertissement · Cliquer pour détails' : 'Warning · Click for details')}
+                    </div>
+                  </div>
+                  <Icons.chevronRight className="text-muted-2 mt-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
               ))}
             </div>
           </Card>
@@ -239,6 +372,97 @@ export function Workspace() {
           </Card>
         </div>
       </div>
+
+      {/* Issue detail modal */}
+      <Modal
+        open={!!selectedIssue}
+        onClose={() => setSelectedIssue(null)}
+        title={selectedIssue ? (lang === 'fr' ? selectedIssue.title_fr : selectedIssue.title_en) : ''}
+        width={540}
+      >
+        {selectedIssue && (
+          <div className="flex flex-col gap-4">
+            {/* Level badge */}
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                selectedIssue.lvl === 'critical'
+                  ? 'bg-red/8 text-red border border-red/20'
+                  : 'bg-amber/8 text-amber border border-amber/20'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${selectedIssue.lvl === 'critical' ? 'bg-red' : 'bg-amber'}`} />
+                {selectedIssue.lvl === 'critical'
+                  ? (lang === 'fr' ? 'Erreur critique' : 'Critical error')
+                  : (lang === 'fr' ? 'Avertissement' : 'Warning')}
+              </span>
+            </div>
+
+            {/* Description */}
+            <Section
+              label={lang === 'fr' ? 'Description' : 'Description'}
+              icon={<Icons.info />}
+            >
+              <p className="text-[13px] text-ink-2 leading-relaxed">
+                {lang === 'fr' ? selectedIssue.desc_fr : selectedIssue.desc_en}
+              </p>
+            </Section>
+
+            {/* Impact */}
+            <Section
+              label={lang === 'fr' ? 'Impact sur le dossier' : 'Impact on the file'}
+              icon={<Icons.alert />}
+              iconColor={selectedIssue.lvl === 'critical' ? 'text-red' : 'text-amber'}
+            >
+              <p className="text-[13px] text-ink-2 leading-relaxed">
+                {lang === 'fr' ? selectedIssue.impact_fr : selectedIssue.impact_en}
+              </p>
+            </Section>
+
+            {/* How to fix */}
+            <Section
+              label={lang === 'fr' ? 'Comment corriger' : 'How to fix'}
+              icon={<Icons.check />}
+              iconColor="text-green"
+            >
+              <p className="text-[13px] text-ink-2 leading-relaxed">
+                {lang === 'fr' ? selectedIssue.fix_fr : selectedIssue.fix_en}
+              </p>
+            </Section>
+
+            {/* CTA */}
+            {selectedIssue.href && (
+              <div className="pt-1">
+                <Link href={selectedIssue.href} onClick={() => setSelectedIssue(null)}>
+                  <Btn variant="primary" size="sm" iconRight={<Icons.arrowRight />}>
+                    {lang === 'fr' ? selectedIssue.href_label_fr : selectedIssue.href_label_en}
+                  </Btn>
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+}
+
+function Section({
+  label,
+  icon,
+  iconColor = 'text-muted-2',
+  children,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  iconColor?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-line bg-bg-2 px-4 py-3.5">
+      <div className={`flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[.07em] mb-2 ${iconColor}`}>
+        {icon}
+        <span className="text-muted">{label}</span>
+      </div>
+      {children}
     </div>
   );
 }

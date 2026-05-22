@@ -115,7 +115,7 @@ export function AdminDashboard() {
                   <tr key={org.id} className="border-b border-line-2 last:border-none hover:bg-bg-2/40 transition-colors">
                     <td className="px-5 py-3">
                       <div className="font-medium text-ink">{org.name}</div>
-                      <div className="text-[11.5px] text-muted">{org.admin_email}</div>
+                      <div className="text-[11.5px] text-muted">{org.adminEmail}</div>
                     </td>
                     <td className="px-5 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${PLAN_COLORS[org.plan]}`}>

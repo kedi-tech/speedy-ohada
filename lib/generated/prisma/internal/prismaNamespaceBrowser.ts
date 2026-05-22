@@ -98,6 +98,15 @@ export const OrganizationScalarFieldEnum = {
   plan: 'plan',
   status: 'status',
   adminEmail: 'adminEmail',
+  oneccaNumber: 'oneccaNumber',
+  rccm: 'rccm',
+  address: 'address',
+  city: 'city',
+  country: 'country',
+  phone: 'phone',
+  email: 'email',
+  website: 'website',
+  logoUrl: 'logoUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

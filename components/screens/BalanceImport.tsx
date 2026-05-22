@@ -14,10 +14,11 @@ import { normalizeBalance } from '@/lib/engine/BalanceNormalizer';
 import { enrichAllWithPrefixes } from '@/lib/engine/AccountPrefixEngine';
 import { enrichAllWithClass } from '@/lib/engine/OHADAClassEngine';
 import { useWorkspace } from '@/context/WorkspaceContext';
+import { useAppData } from '@/lib/useAppData';
 import type { RawImportLine } from '@/lib/engine/types';
 import { formatAmount } from '@/lib/format';
 
-const STEPS = ['upload', 'columns', 'preview'] as const;
+const STEPS = ['select', 'upload', 'columns', 'preview'] as const;
 type Step = typeof STEPS[number];
 
 function fmtAmount(n: number) {
@@ -171,8 +172,6 @@ function buildRawLines(rows: unknown[][], headers: string[], colMap: Record<stri
     return idx !== undefined ? row[idx] : '';
   };
 
-  const IGNORED_ACCOUNTS = new Set(['521600']);
-
   return rows.slice(1).filter((r) => r.some((c) => c !== '' && c !== null && c !== undefined)).map((row, ri) => ({
     row_index:       ri + 1,
     account_number:  String(getByField(row, 'account_number') ?? '').trim(),
@@ -183,7 +182,7 @@ function buildRawLines(rows: unknown[][], headers: string[], colMap: Record<stri
     movement_credit: toNum(getByField(row, 'movement_credit')),
     closing_debit:   toNum(getByField(row, 'closing_debit')),
     closing_credit:  toNum(getByField(row, 'closing_credit')),
-  })).filter((l) => /^[0-9]/.test(l.account_number) && !IGNORED_ACCOUNTS.has(l.account_number));
+  })).filter((l) => /^[0-9]/.test(l.account_number));
 }
 
 function detectSheets(sheetNames: string[]): { nSheet: string | null; n1Sheet: string | null } {
@@ -198,8 +197,11 @@ function detectSheets(sheetNames: string[]): { nSheet: string | null; n1Sheet: s
 export function BalanceImport() {
   const { t, lang } = useT();
   const router = useRouter();
-  const { activeFiscalYear } = useWorkspace();
-  const [step, setStep] = useState<Step>('upload');
+  const { activeFiscalYear, setActive } = useWorkspace();
+  const { companies, fiscalYears } = useAppData();
+  const [step, setStep] = useState<Step>('select');
+  const [selectedCompanyId, setSelectedCompanyId] = useState(activeFiscalYear?.company_id ?? '');
+  const [selectedFiscalYearId, setSelectedFiscalYearId] = useState(activeFiscalYear?.id ?? '');
   const [isDragging, setIsDragging] = useState(false);
   const [balanceType, setBalanceType] = useState<'N' | 'N-1'>('N');
   const [parsed, setParsed] = useState<ParsedFile | null>(null);
@@ -311,7 +313,7 @@ export function BalanceImport() {
   };
 
   const rawLines   = parsed   ? buildRawLines(parsed.rows,   parsed.headers,   colMap) : [];
-  const rawLinesN1 = parsedN1 ? buildRawLines(parsedN1.rows, parsedN1.headers, colMap) : [];
+  const rawLinesN1 = parsedN1 ? buildRawLines(parsedN1.rows, parsedN1.headers, parsedN1.colMap) : [];
 
   // Compute live preview stats
   const previewAccounts = rawLines.length > 0 ? enrichAllWithClass(enrichAllWithPrefixes(
@@ -416,6 +418,7 @@ export function BalanceImport() {
         {/* Stepper */}
         <div className="flex items-center gap-0">
           {([
+            { key: 'select',  label: lang === 'fr' ? 'Société' : 'Company' },
             { key: 'upload',  label: lang === 'fr' ? 'Fichier' : 'File' },
             { key: 'columns', label: lang === 'fr' ? 'Colonnes' : 'Columns' },
             { key: 'preview', label: lang === 'fr' ? 'Aperçu' : 'Preview' },
@@ -434,7 +437,7 @@ export function BalanceImport() {
                   </div>
                   <span className={`text-[13px] font-medium ${active ? 'text-ink' : 'text-muted'}`}>{s.label}</span>
                 </div>
-                {i < 2 && (
+                {i < 3 && (
                   <div className="w-12 h-px mx-3" style={{ background: done ? 'var(--color-green)' : 'var(--color-line)' }} />
                 )}
               </div>
@@ -446,6 +449,70 @@ export function BalanceImport() {
           <div className="px-4 py-3 rounded-xl bg-red-soft border border-red/20 text-[13px] text-red">
             {error}
           </div>
+        )}
+
+        {/* Step: Select company & fiscal year */}
+        {step === 'select' && (
+          <Card className="p-6 max-w-xl">
+            <div className="flex flex-col gap-5">
+              <div>
+                <div className="text-[15px] font-semibold text-ink mb-1">
+                  {lang === 'fr' ? 'Choisir la société et l\'exercice' : 'Select company and fiscal year'}
+                </div>
+                <div className="text-[12.5px] text-muted">
+                  {lang === 'fr'
+                    ? 'La balance sera importée pour l\'exercice sélectionné.'
+                    : 'The trial balance will be imported into the selected fiscal year.'}
+                </div>
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-muted uppercase tracking-[.08em] mb-1.5">
+                  {lang === 'fr' ? 'Société' : 'Company'}
+                </label>
+                <select
+                  value={selectedCompanyId}
+                  onChange={(e) => { setSelectedCompanyId(e.target.value); setSelectedFiscalYearId(''); }}
+                  className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust"
+                >
+                  <option value="">{lang === 'fr' ? '— Choisir une société' : '— Select a company'}</option>
+                  {companies.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-muted uppercase tracking-[.08em] mb-1.5">
+                  {lang === 'fr' ? 'Exercice fiscal' : 'Fiscal year'}
+                </label>
+                <select
+                  value={selectedFiscalYearId}
+                  onChange={(e) => setSelectedFiscalYearId(e.target.value)}
+                  disabled={!selectedCompanyId}
+                  className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="">{lang === 'fr' ? '— Choisir un exercice' : '— Select a fiscal year'}</option>
+                  {fiscalYears
+                    .filter((fy) => fy.company_id === selectedCompanyId)
+                    .map((fy) => (
+                      <option key={fy.id} value={fy.id}>{fy.label}</option>
+                    ))}
+                </select>
+              </div>
+              <div className="flex justify-end pt-1">
+                <Btn
+                  variant="primary"
+                  iconRight={<Icons.arrowRight />}
+                  disabled={!selectedCompanyId || !selectedFiscalYearId}
+                  onClick={() => {
+                    setActive(selectedCompanyId, selectedFiscalYearId);
+                    setStep('upload');
+                  }}
+                >
+                  {lang === 'fr' ? 'Continuer' : 'Continue'}
+                </Btn>
+              </div>
+            </div>
+          </Card>
         )}
 
         {/* Step: Upload */}

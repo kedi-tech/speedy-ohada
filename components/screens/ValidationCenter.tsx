@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
 import { Badge } from '@/components/ui/Badge';
 import { Icons } from '@/components/ui/Icon';
+import { Modal } from '@/components/ui/Modal';
 import type { ValidationLevel } from '@/lib/types';
 import type { ValidationResult, ValidationMessage } from '@/lib/engine/types';
 import type { TraceabilitySummary } from '@/lib/engine/TraceabilityEngine';
@@ -152,6 +153,7 @@ export function ValidationCenter() {
   const [fixMessage, setFixMessage] = useState('');
   const [traceability, setTraceability] = useState<TraceabilitySummary[]>([]);
   const [selectedTraceKey, setSelectedTraceKey] = useState('');
+  const [selectedValidation, setSelectedValidation] = useState<FlatValidation | null>(null);
 
   const result = state.result;
 
@@ -442,9 +444,14 @@ export function ValidationCenter() {
             {filtered.map((v, i) => {
               const badgeStatus = LEVEL_BADGE[v.level];
               const badgeLabel = LEVEL_LABEL[v.level][lang];
+              const isClickable = v.level !== 'passed';
               return (
-                <div key={`${v.code ?? v.fr}-${i}`} className="grid items-start gap-4 px-5 py-3.5 hover:bg-bg transition-colors"
-                  style={{ gridTemplateColumns: '20px 1fr auto auto', borderBottom: i < filtered.length - 1 ? '1px solid var(--color-line-2)' : 'none' }}>
+                <div
+                  key={`${v.code ?? v.fr}-${i}`}
+                  className={`grid items-start gap-4 px-5 py-3.5 transition-colors ${isClickable ? 'cursor-pointer hover:bg-bg' : ''}`}
+                  style={{ gridTemplateColumns: '20px 1fr auto auto', borderBottom: i < filtered.length - 1 ? '1px solid var(--color-line-2)' : 'none' }}
+                  onClick={isClickable ? () => setSelectedValidation(v) : undefined}
+                >
                   <div className="mt-0.5">
                     {v.level === 'passed' ? (
                       <span className="w-5 h-5 rounded-full bg-green-soft text-green grid place-items-center"><Icons.check /></span>
@@ -462,7 +469,7 @@ export function ValidationCenter() {
                       size="sm"
                       variant="ghost"
                       disabled={fixingKey === (v.code ?? v.fr)}
-                      onClick={() => void handleFix(v)}
+                      onClick={(e) => { e.stopPropagation(); void handleFix(v); }}
                     >
                       {fixingKey === (v.code ?? v.fr)
                         ? (lang === 'fr' ? 'Correction...' : 'Fixing...')
@@ -477,6 +484,72 @@ export function ValidationCenter() {
           </div>
         </Card>
       </div>
+
+      {/* Validation detail modal */}
+      <Modal
+        open={!!selectedValidation}
+        onClose={() => setSelectedValidation(null)}
+        title={selectedValidation ? (lang === 'fr' ? selectedValidation.fr : selectedValidation.en) : ''}
+        width={560}
+      >
+        {selectedValidation && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                selectedValidation.level === 'critical'
+                  ? 'bg-red/8 text-red border border-red/20'
+                  : 'bg-amber/8 text-amber border border-amber/20'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${selectedValidation.level === 'critical' ? 'bg-red' : 'bg-amber'}`} />
+                {LEVEL_LABEL[selectedValidation.level][lang]}
+              </span>
+              {selectedValidation.code && (
+                <span className="text-[11.5px] font-mono text-muted-2 bg-bg-2 px-2 py-0.5 rounded">{selectedValidation.code}</span>
+              )}
+              {selectedValidation.cat !== 'all' && (
+                <span className="text-[11.5px] text-muted bg-bg-2 px-2 py-0.5 rounded">{CAT_LABELS[selectedValidation.cat][lang]}</span>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-line bg-bg-2 px-4 py-3.5">
+              <div className="text-[11px] font-semibold text-muted uppercase tracking-[.07em] mb-2 flex items-center gap-1.5">
+                <Icons.info />
+                {lang === 'fr' ? 'Message de validation' : 'Validation message'}
+              </div>
+              <p className="text-[13px] text-ink-2 leading-relaxed">
+                {lang === 'fr' ? selectedValidation.fr : selectedValidation.en}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-line bg-bg-2 px-4 py-3.5">
+              <div className={`text-[11px] font-semibold uppercase tracking-[.07em] mb-2 flex items-center gap-1.5 ${
+                selectedValidation.level === 'critical' ? 'text-red' : 'text-amber'
+              }`}>
+                <Icons.alert />
+                <span className="text-muted">{lang === 'fr' ? 'Action requise' : 'Required action'}</span>
+              </div>
+              <p className="text-[13px] text-ink-2 leading-relaxed">
+                {manualFixMessage(selectedValidation, lang)}
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2.5 pt-1">
+              <Btn variant="ghost" onClick={() => setSelectedValidation(null)}>
+                {lang === 'fr' ? 'Fermer' : 'Close'}
+              </Btn>
+              <Btn
+                variant={selectedValidation.level === 'critical' ? 'primary' : 'secondary'}
+                disabled={fixingKey === (selectedValidation.code ?? selectedValidation.fr)}
+                onClick={() => { void handleFix(selectedValidation); setSelectedValidation(null); }}
+              >
+                {canAutoFixFormula(selectedValidation)
+                  ? (lang === 'fr' ? 'Recalculer' : 'Recalculate')
+                  : (lang === 'fr' ? 'Corriger' : 'Fix')}
+              </Btn>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

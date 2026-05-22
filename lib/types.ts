@@ -264,9 +264,18 @@ export interface Organization {
   id: string;
   name: string;
   plan: SubscriptionPlan;
+  status: string;
+  adminEmail: string;
+  oneccaNumber?: string;
+  rccm?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  logoUrl?: string;
   companies: number;
   users: number;
-  status: 'active' | 'suspended' | 'trial';
-  created_at: string;
-  admin_email: string;
+  created_at?: string;
 }

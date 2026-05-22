@@ -1,44 +1,135 @@
-﻿'use client';
+'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useT } from '@/context/LangContext';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
 import { Icons } from '@/components/ui/Icon';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useAppData } from '@/lib/useAppData';
 
-type Tab = 'firm' | 'preferences' | 'security' | 'integrations' | 'billing';
+type Tab = 'firm' | 'preferences' | 'security' | 'billing';
+
+const COUNTRIES = [
+  "Côte d'Ivoire", 'Sénégal', 'Mali', 'Burkina Faso', 'Niger',
+  'Guinée', 'Togo', 'Bénin', 'Cameroun', 'Congo', 'Gabon', 'RDC', 'Autre',
+];
+
+const PLANS = [
+  { value: 'starter',       fr: 'Starter',       en: 'Starter' },
+  { value: 'cabinet',       fr: 'Cabinet',        en: 'Cabinet' },
+  { value: 'cabinet_pro',   fr: 'Cabinet Pro',    en: 'Cabinet Pro' },
+  { value: 'enterprise',    fr: 'Entreprise',     en: 'Enterprise' },
+];
 
 export function SettingsScreen() {
   const { lang, setLang } = useT();
+  const router = useRouter();
   const fr = lang === 'fr';
   const [tab, setTab] = useState<Tab>('firm');
+
+  const { organizations, loading: dataLoading } = useAppData();
+  const org = organizations[0];
+
+  const [form, setForm] = useState({
+    name: '', adminEmail: '', plan: 'starter', oneccaNumber: '',
+    rccm: '', address: '', city: '', country: '', phone: '', email: '', website: '',
+  });
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const tabs: { key: Tab; fr: string; en: string }[] = [
-    { key: 'firm',         fr: 'Cabinet',             en: 'Firm' },
-    { key: 'preferences',  fr: 'Préférences',          en: 'Preferences' },
-    { key: 'security',     fr: 'Sécurité',             en: 'Security' },
-    // { key: 'integrations', fr: 'Intégrations',         en: 'Integrations' },
-    { key: 'billing',      fr: 'Facturation',          en: 'Billing' },
-  ];
+  useEffect(() => {
+    if (org) {
+      setForm({
+        name:         org.name         ?? '',
+        adminEmail:   org.adminEmail   ?? '',
+        plan:         org.plan         ?? 'starter',
+        oneccaNumber: org.oneccaNumber ?? '',
+        rccm:         org.rccm         ?? '',
+        address:      org.address      ?? '',
+        city:         org.city         ?? '',
+        country:      org.country      ?? '',
+        phone:        org.phone        ?? '',
+        email:        org.email        ?? '',
+        website:      org.website      ?? '',
+      });
+    }
+  }, [org]);
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm((p) => ({ ...p, [key]: e.target.value }));
+
+  const handleSaveFirm = async () => {
+    if (!org?.id) return;
+    setSaving(true);
+    setSaveError('');
+    try {
+      const res = await fetch(`/api/organizations/${org.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        setSaveError(d.error ?? (fr ? 'Erreur lors de la sauvegarde' : 'Save failed'));
+        return;
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch {
+      setSaveError(fr ? 'Erreur réseau' : 'Network error');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  const handleDeleteOrg = async () => {
+    if (!org?.id) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/organizations/${org.id}`, { method: 'DELETE' });
+      if (res.ok) router.push('/login');
+    } finally {
+      setDeleting(false);
+      setDeleteOpen(false);
+    }
+  };
+
+  const tabs: { key: Tab; fr: string; en: string }[] = [
+    { key: 'firm',        fr: 'Cabinet',     en: 'Firm' },
+    { key: 'preferences', fr: 'Préférences', en: 'Preferences' },
+    { key: 'security',    fr: 'Sécurité',    en: 'Security' },
+    { key: 'billing',     fr: 'Facturation', en: 'Billing' },
+  ];
+
+  function Field({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
     return (
       <div>
-        <label className="block text-[12.5px] font-semibold text-ink-2 mb-1.5">{label}</label>
+        <label className="block text-[12.5px] font-semibold text-ink-2 mb-1.5">
+          {label}{required && <span className="text-red ml-0.5">*</span>}
+        </label>
         {children}
       </div>
     );
   }
 
-  function Input({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
-    return <input {...props} className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust transition-colors" />;
+  function Input({ value, onChange, placeholder, type = 'text' }: {
+    value: string; onChange: React.ChangeEventHandler<HTMLInputElement>; placeholder?: string; type?: string;
+  }) {
+    return (
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust transition-colors"
+      />
+    );
   }
 
   function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
@@ -52,24 +143,28 @@ export function SettingsScreen() {
     );
   }
 
-  const [toggles, setToggles] = useState({
-    emailNotifs: true,
-    reviewAlerts: true,
-    exportAlerts: false,
-    twoFactor: false,
-    sessionTimeout: true,
-  });
+  const [toggles, setToggles] = useState({ emailNotifs: true, reviewAlerts: true, exportAlerts: false });
   const toggle = (key: keyof typeof toggles) => setToggles((p) => ({ ...p, [key]: !p[key] }));
+
+  const isFirmTab = tab === 'firm';
+  const orgInitial = org?.name?.[0]?.toUpperCase() ?? '?';
 
   return (
     <div>
       <PageHeader
         title={fr ? 'Paramètres' : 'Settings'}
-        subtitle={fr ? 'Cabinet Diaby Ibrahim & Associés' : 'Cabinet Diaby Ibrahim & Associates'}
+        subtitle={org?.name ?? (dataLoading ? '…' : (fr ? 'Cabinet' : 'Firm'))}
         actions={
-          <Btn variant="primary" icon={saved ? <Icons.check /> : undefined} onClick={handleSave}>
-            {saved ? (fr ? 'Enregistré !' : 'Saved!') : (fr ? 'Enregistrer' : 'Save')}
-          </Btn>
+          isFirmTab ? (
+            <Btn
+              variant="primary"
+              icon={saved ? <Icons.check /> : saving ? undefined : undefined}
+              onClick={handleSaveFirm}
+              disabled={saving || dataLoading || !org}
+            >
+              {saving ? (fr ? 'Enregistrement…' : 'Saving…') : saved ? (fr ? 'Enregistré !' : 'Saved!') : (fr ? 'Enregistrer' : 'Save')}
+            </Btn>
+          ) : null
         }
       />
 
@@ -85,50 +180,123 @@ export function SettingsScreen() {
           ))}
         </div>
 
-        {/* Firm settings */}
+        {/* ── FIRM TAB ── */}
         {tab === 'firm' && (
-          <Card>
-            <CardHeader title={fr ? 'Informations du cabinet' : 'Firm information'} />
-            <div className="px-5 py-5 grid gap-4 max-w-xl">
-              <Field label={fr ? 'Nom du cabinet *' : 'Firm name *'}>
-                <Input defaultValue="Cabinet Diaby Ibrahim & Associés" />
-              </Field>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label={fr ? 'Numéro ONECCA' : 'ONECCA number'}>
-                  <Input defaultValue="CI-2019-CEC-00142" />
-                </Field>
-                <Field label={fr ? 'RCCM' : 'RCCM'}>
-                  <Input defaultValue="CI-ABJ-2019-B-04521" />
-                </Field>
+          <div className="flex flex-col gap-5">
+            {saveError && (
+              <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red/8 border border-red/20 text-red text-[13px]">
+                <Icons.alert /> {saveError}
               </div>
-              <Field label={fr ? 'Adresse' : 'Address'}>
-                <Input defaultValue="Cocody Riviera Palmeraie, Abidjan" />
-              </Field>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label={fr ? 'Téléphone' : 'Phone'}>
-                  <Input defaultValue="+225 27 22 41 36 XX" />
+            )}
+
+            <Card>
+              <CardHeader title={fr ? 'Identité du cabinet' : 'Firm identity'} />
+              <div className="px-5 py-5 grid gap-4 max-w-xl">
+                {/* Logo row */}
+                <Field label={fr ? 'Logo du cabinet' : 'Firm logo'}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-rust/10 grid place-items-center text-rust text-xl font-bold flex-shrink-0">
+                      {orgInitial}
+                    </div>
+                    <Btn variant="secondary" size="sm">{fr ? 'Changer le logo' : 'Change logo'}</Btn>
+                  </div>
                 </Field>
-                <Field label="Email">
-                  <Input defaultValue="contact@cabinet-diaby.ci" />
+
+                <Field label={fr ? 'Nom du cabinet *' : 'Firm name *'} required>
+                  <Input value={form.name} onChange={set('name')} placeholder={fr ? 'Cabinet Dupont & Associés' : 'Dupont & Associates'} />
                 </Field>
-              </div>
-              <Field label={fr ? 'Site web' : 'Website'}>
-                <Input defaultValue="https://cabinet-diaby.ci" />
-              </Field>
-              <Field label={fr ? 'Logo du cabinet' : 'Firm logo'}>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-rust/10 grid place-items-center text-rust font-bold text-lg">D</div>
-                  <Btn variant="secondary">{fr ? 'Changer le logo' : 'Change logo'}</Btn>
+                <Field label={fr ? 'Email administrateur *' : 'Admin email *'} required>
+                  <Input value={form.adminEmail} onChange={set('adminEmail')} type="email" placeholder="admin@cabinet.ci" />
+                </Field>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label={fr ? 'Numéro ONECCA' : 'ONECCA number'}>
+                    <Input value={form.oneccaNumber} onChange={set('oneccaNumber')} placeholder="CI-2019-CEC-00142" />
+                  </Field>
+                  <Field label="RCCM">
+                    <Input value={form.rccm} onChange={set('rccm')} placeholder="CI-ABJ-2019-B-04521" />
+                  </Field>
                 </div>
-              </Field>
-            </div>
-          </Card>
+                <Field label={fr ? 'Plan' : 'Plan'}>
+                  <select
+                    value={form.plan}
+                    onChange={set('plan')}
+                    className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust"
+                  >
+                    {PLANS.map((p) => (
+                      <option key={p.value} value={p.value}>{fr ? p.fr : p.en}</option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
+            </Card>
+
+            <Card>
+              <CardHeader title={fr ? 'Coordonnées' : 'Contact details'} />
+              <div className="px-5 py-5 grid gap-4 max-w-xl">
+                <Field label={fr ? 'Adresse' : 'Address'}>
+                  <Input value={form.address} onChange={set('address')} placeholder="Cocody Riviera Palmeraie" />
+                </Field>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label={fr ? 'Ville' : 'City'}>
+                    <Input value={form.city} onChange={set('city')} placeholder="Abidjan" />
+                  </Field>
+                  <Field label={fr ? 'Pays' : 'Country'}>
+                    <select
+                      value={form.country}
+                      onChange={set('country')}
+                      className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust"
+                    >
+                      <option value="">{fr ? '— Choisir —' : '— Select —'}</option>
+                      {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </Field>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label={fr ? 'Téléphone' : 'Phone'}>
+                    <Input value={form.phone} onChange={set('phone')} placeholder="+225 27 22 41 36 00" />
+                  </Field>
+                  <Field label="Email">
+                    <Input value={form.email} onChange={set('email')} type="email" placeholder="contact@cabinet.ci" />
+                  </Field>
+                </div>
+                <Field label={fr ? 'Site web' : 'Website'}>
+                  <Input value={form.website} onChange={set('website')} placeholder="https://cabinet.ci" />
+                </Field>
+              </div>
+            </Card>
+
+            {/* Danger zone */}
+            <Card className="border-red/20">
+              <CardHeader
+                title={fr ? 'Zone dangereuse' : 'Danger zone'}
+                subtitle={fr ? 'Ces actions sont irréversibles.' : 'These actions are irreversible.'}
+              />
+              <div className="px-5 py-4 flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-[13px] font-semibold text-ink">
+                    {fr ? 'Supprimer le cabinet' : 'Delete this firm'}
+                  </div>
+                  <div className="text-[12px] text-muted mt-0.5">
+                    {fr
+                      ? 'Supprime définitivement le cabinet et toutes ses sociétés, exercices et données.'
+                      : 'Permanently deletes the firm and all its companies, fiscal years, and data.'}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setDeleteOpen(true)}
+                  className="flex-shrink-0 px-3.5 py-2 rounded-lg text-[12.5px] font-semibold text-red border border-red/30 hover:bg-red/8 transition-colors"
+                >
+                  {fr ? 'Supprimer le cabinet' : 'Delete firm'}
+                </button>
+              </div>
+            </Card>
+          </div>
         )}
 
-        {/* Preferences */}
+        {/* ── PREFERENCES TAB ── */}
         {tab === 'preferences' && (
           <Card>
-            <CardHeader title={fr ? 'Préférences d\'affichage' : 'Display preferences'} />
+            <CardHeader title={fr ? "Préférences d'affichage" : 'Display preferences'} />
             <div className="px-5 py-5 max-w-xl flex flex-col gap-5">
               <Field label={fr ? 'Langue par défaut' : 'Default language'}>
                 <select value={lang} onChange={(e) => setLang(e.target.value as 'fr' | 'en')}
@@ -137,123 +305,71 @@ export function SettingsScreen() {
                   <option value="en">English</option>
                 </select>
               </Field>
-              <Field label={fr ? 'Devise par défaut' : 'Default currency'}>
-                <select className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust">
-                  {['GNF', 'EUR', 'USD'].map((c) => <option key={c}>{c}</option>)}
-                </select>
-              </Field>
-              <Field label={fr ? 'Format de date' : 'Date format'}>
-                <select className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust">
-                  <option>DD/MM/YYYY</option>
-                  <option>MM/DD/YYYY</option>
-                  <option>YYYY-MM-DD</option>
-                </select>
-              </Field>
               <div>
                 <div className="text-[12.5px] font-semibold text-ink-2 mb-2">{fr ? 'Notifications' : 'Notifications'}</div>
                 <Toggle checked={toggles.emailNotifs} onChange={() => toggle('emailNotifs')} label={fr ? 'Notifications par email' : 'Email notifications'} />
                 <Toggle checked={toggles.reviewAlerts} onChange={() => toggle('reviewAlerts')} label={fr ? 'Alertes de révision' : 'Review alerts'} />
-                <Toggle checked={toggles.exportAlerts} onChange={() => toggle('exportAlerts')} label={fr ? 'Notifications d\'export' : 'Export notifications'} />
+                <Toggle checked={toggles.exportAlerts} onChange={() => toggle('exportAlerts')} label={fr ? "Notifications d'export" : 'Export notifications'} />
               </div>
             </div>
           </Card>
         )}
 
-        {/* Security */}
+        {/* ── SECURITY TAB ── */}
         {tab === 'security' && (
-          <div className="flex flex-col gap-4">
-            <Card>
-              <CardHeader title={fr ? 'Mot de passe' : 'Password'} />
-              <div className="px-5 py-5 max-w-sm flex flex-col gap-4">
-                <Field label={fr ? 'Mot de passe actuel' : 'Current password'}>
-                  <input type="password" className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust" />
-                </Field>
-                <Field label={fr ? 'Nouveau mot de passe' : 'New password'}>
-                  <input type="password" className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust" />
-                </Field>
-                <Field label={fr ? 'Confirmer' : 'Confirm'}>
-                  <input type="password" className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust" />
-                </Field>
-                <Btn variant="primary" className="self-start">{fr ? 'Mettre à jour' : 'Update'}</Btn>
-              </div>
-            </Card>
-            {/* <Card>
-              <CardHeader title={fr ? 'Authentification à deux facteurs' : 'Two-factor authentication'} />
-              <div className="px-5 py-4">
-                <Toggle checked={toggles.twoFactor} onChange={() => toggle('twoFactor')} label={fr ? 'Activer la 2FA par email/SMS' : 'Enable 2FA via email/SMS'} />
-                <Toggle checked={toggles.sessionTimeout} onChange={() => toggle('sessionTimeout')} label={fr ? 'Déconnexion automatique après 30 min' : 'Auto-logout after 30 min'} />
-              </div>
-            </Card> */}
-          </div>
-        )}
-
-        {/* Integrations */}
-        {tab === 'integrations' && (
           <Card>
-            <CardHeader title={fr ? 'Intégrations disponibles' : 'Available integrations'} />
-            <div className="px-5 py-5 flex flex-col gap-3">
+            <CardHeader title={fr ? 'Mot de passe' : 'Password'} />
+            <div className="px-5 py-5 max-w-sm flex flex-col gap-4">
               {[
-                { name: 'Sage Paie & RH', desc: fr ? 'Importation automatique des charges de personnel' : 'Automatic personnel cost import', connected: true },
-                { name: 'DGI e-Impôts CI', desc: fr ? 'Envoi électronique des déclarations fiscales' : 'Electronic submission of tax returns', connected: false },
-                { name: 'Excel / CSV',     desc: fr ? 'Importation de balances depuis Excel ou CSV' : 'Balance import from Excel or CSV', connected: true },
-                { name: 'API REST',        desc: fr ? 'Connectez votre ERP via API REST sécurisée' : 'Connect your ERP via secure REST API', connected: false },
-              ].map((int, i) => (
-                <div key={i} className="flex items-center gap-4 p-3 rounded-lg border border-line">
-                  <div className="w-9 h-9 rounded-lg bg-rust/10 grid place-items-center text-rust flex-shrink-0 text-[11px] font-bold">{int.name[0]}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-semibold text-ink">{int.name}</div>
-                    <div className="text-[12px] text-muted">{int.desc}</div>
-                  </div>
-                  <Btn variant={int.connected ? 'ghost' : 'secondary'}>
-                    {int.connected ? (fr ? 'Déconnecter' : 'Disconnect') : (fr ? 'Connecter' : 'Connect')}
-                  </Btn>
-                  {int.connected && <span className="text-[11px] text-green font-semibold">{fr ? 'Connecté' : 'Connected'}</span>}
-                </div>
+                { label: fr ? 'Mot de passe actuel' : 'Current password' },
+                { label: fr ? 'Nouveau mot de passe' : 'New password' },
+                { label: fr ? 'Confirmer' : 'Confirm' },
+              ].map((f, i) => (
+                <Field key={i} label={f.label}>
+                  <input type="password" className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink bg-bg focus:outline-none focus:border-rust" />
+                </Field>
               ))}
+              <Btn variant="primary" className="self-start">{fr ? 'Mettre à jour' : 'Update'}</Btn>
             </div>
           </Card>
         )}
 
-        {/* Billing */}
+        {/* ── BILLING TAB ── */}
         {tab === 'billing' && (
           <div className="flex flex-col gap-4">
             <div className="bg-paper border border-line rounded-xl p-5 flex items-center gap-4">
               <div className="flex-1">
                 <div className="text-[11px] text-muted uppercase tracking-[.08em] mb-1">{fr ? 'Plan actuel' : 'Current plan'}</div>
-                <div className="text-[18px] font-bold text-ink">Cabinet Pro</div>
-                <div className="text-[12.5px] text-muted mt-0.5">{fr ? 'Facturé annuellement · 180 000 GNF/an' : 'Billed annually · 180,000 GNF/yr'}</div>
+                <div className="text-[18px] font-bold text-ink">{PLANS.find((p) => p.value === (org?.plan ?? 'starter'))?.[fr ? 'fr' : 'en'] ?? 'Starter'}</div>
               </div>
               <Btn variant="secondary">{fr ? 'Changer de plan' : 'Change plan'}</Btn>
             </div>
             <Card>
               <CardHeader title={fr ? 'Historique de facturation' : 'Billing history'} />
-              <table className="w-full text-[13px]">
-                <thead>
-                  <tr className="border-b border-line-2 text-left">
-                    {[fr ? 'Date' : 'Date', fr ? 'Description' : 'Description', fr ? 'Montant' : 'Amount', fr ? 'Statut' : 'Status', ''].map((h, i) => (
-                      <th key={i} className="px-5 py-3 text-[11px] font-semibold text-muted uppercase tracking-[.07em]">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { date: '1 jan. 2026', desc: fr ? 'Cabinet Pro · Annuel 2026' : 'Cabinet Pro · Annual 2026', amount: '180 000', status: fr ? 'Payé' : 'Paid' },
-                    { date: '1 jan. 2025', desc: fr ? 'Cabinet Pro · Annuel 2025' : 'Cabinet Pro · Annual 2025', amount: '180 000', status: fr ? 'Payé' : 'Paid' },
-                  ].map((row, i) => (
-                    <tr key={i} className="border-b border-line-2 last:border-none">
-                      <td className="px-5 py-3 text-muted">{row.date}</td>
-                      <td className="px-5 py-3 text-ink">{row.desc}</td>
-                      <td className="px-5 py-3 font-mono">{row.amount} GNF</td>
-                      <td className="px-5 py-3"><span className="text-green text-[11px] font-semibold bg-green-soft px-2 py-0.5 rounded-full">{row.status}</span></td>
-                      <td className="px-5 py-3"><Btn variant="ghost" icon={<Icons.download />}>{fr ? 'Facture' : 'Invoice'}</Btn></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="px-5 py-8 text-center text-[13px] text-muted">
+                {fr ? 'Aucune facture disponible.' : 'No invoices available.'}
+              </div>
             </Card>
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDeleteOrg}
+        loading={deleting}
+        danger
+        requireTyped={org?.name}
+        title={fr ? 'Supprimer le cabinet' : 'Delete firm'}
+        description={
+          fr
+            ? `Cette action supprime définitivement le cabinet "${org?.name}" ainsi que toutes ses sociétés, exercices fiscaux, balances et données associées. Cette opération est irréversible.`
+            : `This action permanently deletes the firm "${org?.name}" along with all its companies, fiscal years, trial balances, and associated data. This cannot be undone.`
+        }
+        confirmLabel={fr ? 'Supprimer définitivement' : 'Delete permanently'}
+        cancelLabel={fr ? 'Annuler' : 'Cancel'}
+      />
     </div>
   );
 }

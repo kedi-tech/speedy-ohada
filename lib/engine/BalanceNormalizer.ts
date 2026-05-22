@@ -61,6 +61,15 @@ export function normalizeAccount(
     }
     netBalance = importedNet;
   } else if (hasClosing && (closingDebit !== 0 || closingCredit !== 0)) {
+    // Flip negative values to opposite side (some exports put negative in the wrong column)
+    if (closingDebit < 0) { closingCredit += Math.abs(closingDebit); closingDebit = 0; }
+    if (closingCredit < 0) { closingDebit += Math.abs(closingCredit); closingCredit = 0; }
+    // Net cumulative columns (both nonzero = software exported running totals, not net balances)
+    if (closingDebit > 0 && closingCredit > 0) {
+      const net = closingDebit - closingCredit;
+      if (net >= 0) { closingDebit = net; closingCredit = 0; }
+      else { closingDebit = 0; closingCredit = -net; }
+    }
     netBalance = closingDebit - closingCredit;
   } else {
     const rawNet = openingDebit + movementDebit - openingCredit - movementCredit;
@@ -92,8 +101,8 @@ export function normalizeAccount(
     opening_credit: openingCredit,
     movement_debit:  movementDebit,
     movement_credit: movementCredit,
-    closing_debit:  Math.abs(closingDebit),
-    closing_credit: Math.abs(closingCredit),
+    closing_debit:  closingDebit,
+    closing_credit: closingCredit,
     net_balance:    netBalance,
     balance_type:   balanceType,
     fiscal_year_id:   fiscalYearId,

@@ -69,3 +69,30 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   return NextResponse.json({ company });
 }
+
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await getServerSessionUser();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { id } = await params;
+
+  const existing = await prisma.company.findUnique({ where: { id } });
+  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  await prisma.auditLog.create({
+    data: {
+      userId: session.id,
+      userName: session.name,
+      userRole: session.role,
+      action: 'delete_company',
+      entityType: 'company',
+      entityName: existing.name,
+      oldValue: existing.id,
+      reason: 'Company deleted from UI',
+    },
+  });
+
+  await prisma.company.delete({ where: { id } });
+
+  return NextResponse.json({ success: true });
+}

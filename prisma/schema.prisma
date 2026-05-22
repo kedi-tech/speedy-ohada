@@ -13,13 +13,22 @@ datasource db {
 }
 
 model Organization {
-  id         String   @id @default(cuid())
-  name       String
-  plan       String   @default("starter")
-  status     String   @default("active")
-  adminEmail String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  plan          String   @default("starter")
+  status        String   @default("active")
+  adminEmail    String
+  oneccaNumber  String?
+  rccm          String?
+  address       String?
+  city          String?
+  country       String?
+  phone         String?
+  email         String?
+  website       String?
+  logoUrl       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   users      User[]
   companies  Company[]

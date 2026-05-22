@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,16 +7,17 @@ import { PageHeader } from '@/components/shell/PageHeader';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Btn } from '@/components/ui/Btn';
 import { Icons } from '@/components/ui/Icon';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useAppData } from '@/lib/useAppData';
 
 const STATUS_LABELS: Record<string, { fr: string; en: string; color: string }> = {
-  draft:       { fr: 'Brouillon',    en: 'Draft',       color: 'text-muted bg-bg-2' },
-  'in-progress':{ fr: 'En cours',    en: 'In progress', color: 'text-amber bg-amber-tint' },
-  ready:       { fr: 'Prêt',         en: 'Ready',       color: 'text-green bg-green-soft' },
-  warning:     { fr: 'Avertissement',en: 'Warning',     color: 'text-amber bg-amber-tint' },
-  approved:    { fr: 'Approuvé',     en: 'Approved',    color: 'text-green bg-green-soft' },
-  locked:      { fr: 'Verrouillé',   en: 'Locked',      color: 'text-ink-2 bg-bg-2' },
-  archived:    { fr: 'Archivé',      en: 'Archived',    color: 'text-muted bg-bg-2' },
+  draft:        { fr: 'Brouillon',     en: 'Draft',       color: 'text-muted bg-bg-2' },
+  'in-progress':{ fr: 'En cours',      en: 'In progress', color: 'text-amber bg-amber-tint' },
+  ready:        { fr: 'Prêt',          en: 'Ready',       color: 'text-green bg-green-soft' },
+  warning:      { fr: 'Avertissement', en: 'Warning',     color: 'text-amber bg-amber-tint' },
+  approved:     { fr: 'Approuvé',      en: 'Approved',    color: 'text-green bg-green-soft' },
+  locked:       { fr: 'Verrouillé',    en: 'Locked',      color: 'text-ink-2 bg-bg-2' },
+  archived:     { fr: 'Archivé',       en: 'Archived',    color: 'text-muted bg-bg-2' },
 };
 
 type Tab = 'overview' | 'fiscal' | 'documents' | 'users';
@@ -26,6 +27,10 @@ export function CompanyProfile({ id }: { id: string }) {
   const router = useRouter();
   const fr = lang === 'fr';
   const [tab, setTab] = useState<Tab>('overview');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   const { companies: COMPANIES, fiscalYears: FISCAL_YEARS, loading } = useAppData();
 
   const company = COMPANIES.find((c) => c.id === id);
@@ -33,10 +38,10 @@ export function CompanyProfile({ id }: { id: string }) {
   const status = STATUS_LABELS[company?.status ?? 'draft'] ?? STATUS_LABELS.draft;
 
   const tabs: { key: Tab; fr: string; en: string }[] = [
-    { key: 'overview',   fr: 'Vue d\'ensemble', en: 'Overview' },
-    { key: 'fiscal',     fr: 'Exercices',        en: 'Fiscal years' },
-    { key: 'documents',  fr: 'Documents',        en: 'Documents' },
-    { key: 'users',      fr: 'Utilisateurs',     en: 'Users' },
+    { key: 'overview',  fr: "Vue d'ensemble", en: 'Overview' },
+    { key: 'fiscal',    fr: 'Exercices',       en: 'Fiscal years' },
+    { key: 'documents', fr: 'Documents',       en: 'Documents' },
+    { key: 'users',     fr: 'Utilisateurs',    en: 'Users' },
   ];
 
   const Info = ({ label, value }: { label: string; value?: string }) => (
@@ -45,6 +50,24 @@ export function CompanyProfile({ id }: { id: string }) {
       <div className="text-[13px] text-ink">{value || <span className="text-muted-2">—</span>}</div>
     </div>
   );
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const res = await fetch(`/api/companies/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const d = await res.json();
+        setDeleteError(d.error ?? (fr ? 'Erreur lors de la suppression' : 'Delete failed'));
+        return;
+      }
+      router.push('/companies');
+    } catch {
+      setDeleteError(fr ? 'Erreur réseau' : 'Network error');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -59,14 +82,9 @@ export function CompanyProfile({ id }: { id: string }) {
       <div>
         <PageHeader
           title={fr ? 'Société introuvable' : 'Company not found'}
-          subtitle={fr ? 'Cette societe n existe pas encore dans Supabase.' : 'This company does not exist in Supabase yet.'}
+          subtitle={fr ? 'Cette société n\'existe pas.' : 'This company does not exist.'}
           actions={<Btn variant="ghost" onClick={() => router.push('/companies')}>{fr ? 'Retour' : 'Back'}</Btn>}
         />
-        <div className="px-8 py-6">
-          <Card className="p-6 text-[13px] text-muted">
-            {fr ? 'Creez une societe ou ouvrez une societe existante depuis la liste.' : 'Create a company or open an existing company from the list.'}
-          </Card>
-        </div>
       </div>
     );
   }
@@ -79,6 +97,14 @@ export function CompanyProfile({ id }: { id: string }) {
         actions={
           <>
             <Btn variant="ghost" onClick={() => router.push('/companies')}>{fr ? 'Retour' : 'Back'}</Btn>
+            <Btn
+              variant="ghost"
+              icon={<Icons.alert />}
+              onClick={() => setDeleteOpen(true)}
+              className="text-red hover:bg-red/8 border-red/20"
+            >
+              {fr ? 'Supprimer' : 'Delete'}
+            </Btn>
             <Btn variant="secondary" icon={<Icons.users />} onClick={() => router.push(`/companies/${id}/users`)}>
               {fr ? 'Utilisateurs' : 'Users'}
             </Btn>
@@ -90,6 +116,12 @@ export function CompanyProfile({ id }: { id: string }) {
       />
 
       <div className="px-8 py-6 pb-12 flex flex-col gap-5">
+        {deleteError && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red/8 border border-red/20 text-red text-[13px]">
+            <Icons.alert /> {deleteError}
+          </div>
+        )}
+
         {/* Header strip */}
         <div className="flex items-center gap-4 p-4 bg-paper border border-line rounded-xl">
           <div className="w-12 h-12 rounded-xl bg-rust/10 grid place-items-center text-rust text-xl font-bold font-serif flex-shrink-0">
@@ -131,8 +163,8 @@ export function CompanyProfile({ id }: { id: string }) {
                 <Info label={fr ? 'Nom commercial' : 'Trade name'} value={company.commercial_name} />
                 <Info label={fr ? 'Forme juridique' : 'Legal form'} value={company.legal_form} />
                 <Info label={fr ? 'Secteur' : 'Sector'} value={company.sector} />
-                <Info label="RCCM" value={company.rccm ?? 'CI-ABJ-2018-B-12847'} />
-                <Info label="NIF" value={company.nif ?? '1820234A'} />
+                <Info label="RCCM" value={company.rccm} />
+                <Info label="NIF" value={company.nif} />
                 <Info label={fr ? 'Devise' : 'Currency'} value={company.currency ?? 'GNF'} />
                 <Info label={fr ? 'Référentiel' : 'Standard'} value={company.accounting_standard ?? 'SYSCOHADA Révisé'} />
               </div>
@@ -143,7 +175,7 @@ export function CompanyProfile({ id }: { id: string }) {
               <div className="px-5 py-5 grid grid-cols-2 gap-4">
                 <Info label={fr ? 'Adresse' : 'Address'} value={company.address} />
                 <Info label={fr ? 'Ville' : 'City'} value={company.city} />
-                <Info label={fr ? 'Pays' : 'Country'} value={company.country ?? "Côte d'Ivoire"} />
+                <Info label={fr ? 'Pays' : 'Country'} value={company.country} />
                 <Info label={fr ? 'Téléphone' : 'Phone'} value={company.phone} />
                 <Info label="Email" value={company.email} />
                 <Info label={fr ? 'Site web' : 'Website'} value={company.website} />
@@ -232,10 +264,8 @@ export function CompanyProfile({ id }: { id: string }) {
         {tab === 'documents' && (
           <Card>
             <CardHeader title={fr ? 'Documents exportés' : 'Exported documents'} />
-            <div className="px-5 py-5 flex flex-col gap-3">
-              <div className="text-[13px] text-muted">
-                {fr ? 'Aucun document exporte pour cette societe.' : 'No exported documents for this company.'}
-              </div>
+            <div className="px-5 py-8 text-center text-[13px] text-muted">
+              {fr ? 'Aucun document exporté pour cette société.' : 'No exported documents for this company.'}
             </div>
           </Card>
         )}
@@ -243,17 +273,33 @@ export function CompanyProfile({ id }: { id: string }) {
         {/* Tab: Users */}
         {tab === 'users' && (
           <Card>
-            <CardHeader title={fr ? 'Utilisateurs assignés' : 'Assigned users'} action={
-              <Btn variant="primary" icon={<Icons.plus />}>{fr ? 'Inviter' : 'Invite'}</Btn>
-            } />
-            <div className="px-5 py-5 flex flex-col gap-3">
-              <div className="text-[13px] text-muted">
-                {fr ? 'Aucun utilisateur assigne a cette societe.' : 'No users assigned to this company.'}
-              </div>
+            <CardHeader
+              title={fr ? 'Utilisateurs assignés' : 'Assigned users'}
+              action={<Btn variant="primary" icon={<Icons.plus />}>{fr ? 'Inviter' : 'Invite'}</Btn>}
+            />
+            <div className="px-5 py-8 text-center text-[13px] text-muted">
+              {fr ? 'Aucun utilisateur assigné à cette société.' : 'No users assigned to this company.'}
             </div>
           </Card>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onClose={() => { setDeleteOpen(false); setDeleteError(''); }}
+        onConfirm={handleDelete}
+        loading={deleting}
+        danger
+        requireTyped={company.name}
+        title={fr ? 'Supprimer la société' : 'Delete company'}
+        description={
+          fr
+            ? `Cette action supprime définitivement la société "${company.name}", tous ses exercices fiscaux, balances importées, affectations de comptes et données associées. Cette opération est irréversible.`
+            : `This action permanently deletes the company "${company.name}", all its fiscal years, imported trial balances, account mappings, and associated data. This cannot be undone.`
+        }
+        confirmLabel={fr ? 'Supprimer définitivement' : 'Delete permanently'}
+        cancelLabel={fr ? 'Annuler' : 'Cancel'}
+      />
     </div>
   );
 }
